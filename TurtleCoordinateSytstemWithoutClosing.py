@@ -5,8 +5,8 @@ turtle.penup()
 turtle.setpos(0, 0)
 turtle.pendown()
 
-target_x = int(input("target x?"))
-target_y = int(input("target y?"))
+target_x = int(input("target x? "))
+target_y = int(input("target y? "))
     
 def move_to_target(target_x, target_y):
     difference_x = target_x - turtle.xcor()
@@ -19,3 +19,6 @@ def move_to_target(target_x, target_y):
     turtle.forward(distance)
 
 move_to_target(target_x, target_y)
+
+while not input("exit? "):
+    pass
