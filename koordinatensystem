@@ -1,0 +1,26 @@
+import motor, math, runloop, sys
+from hub import port, motion_sensor
+
+motion_sensor.reset_yaw(0)
+
+wheel_diameter = 8.8
+wheel_circumference = wheel_diameter * math.pi
+
+wheel_distance = 8
+drivingbase_360_degrees_turn_circumference = wheel_distance * math.pi
+
+def rotate2angle(angle):        #function for turning to an angle relative to the start position
+    fractionOf360Degrees = (angle + (motion_sensor.tilt_angles()[0] * -0.1)) / 360
+    """
+        calculates the angle to turn into a fraction of the full circle: your target angle added to the angle to position 0 and divide it by 360,
+            e.g. target angle = 90°, angle to position 0 = -90°:
+                (90° + (-90° * -1)) / 360° = (90° + 90°) / 360° = 180° / 360° = 1/2
+    """
+    degrees = (drivingbase_360_degrees_turn_circumference * fractionOf360Degrees / wheel_circumference) * 360
+    """
+        calculates the angle to finally drive for one motor: 
+    """
+    runloop.run(motor.run_for_degrees(port.A, round(degrees), 100), motor.run_for_degrees(port.B, round(degrees), 100))
+rotate2angle(90)
+
+sys.exit()
