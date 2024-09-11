@@ -1,6 +1,7 @@
 from hub import port, motion_sensor
 import motor, motor_pair
 
+Kp = 1.5
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
 while True:
-    motor_pair.move(0,round(motion_sensor.tilt_angles()[0]/10* (100/ 180)))
+    motor_pair.move(0,round(motion_sensor.tilt_angles()[0]/10*(100/ 180)*Kp),velocity = 600)
