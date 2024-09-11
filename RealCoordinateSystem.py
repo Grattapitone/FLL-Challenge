@@ -2,7 +2,7 @@
 import motor, math, runloop, sys
 from hub import port, motion_sensor
 
-class CoordindateSystem():
+class CoordinateSystem():
     def __init__(self, width, height, *, port1=port.A, port2=port.B, wheel_diameter=8.8, wheel_distance=8):
         motion_sensor.reset_yaw(0)
         self.width = width
