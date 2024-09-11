@@ -28,9 +28,7 @@ class CoordindateSystem():
     def goTo(self, target_x, target_y, speed=300):
         if target_x > self.width or target_y > self.height or target_x < 0 or target_y < 0:
             print("Invalid Coordinates")
-            continue
-            #if it still doesn't work, just remove the entire if-structure
-        
+            sys.exit()
         self.difference_x = target_x - self.x
         self.difference_y = target_y - self.y
         
