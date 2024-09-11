@@ -1,4 +1,4 @@
-#I have no idea if anything here works, but we'll see 
+#I have no idea if anything here works, but we'll see
 import motor, math, runloop, sys
 from hub import port, motion_sensor
 
