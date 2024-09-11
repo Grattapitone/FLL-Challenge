@@ -35,8 +35,8 @@ class CoordinateSystem():
         self.distance = math.sqrt(self.difference_x**2 + self.difference_y**2)
         self.angle = math.degrees(math.atan2(self.difference_y, self.difference_x))
 
-        rotateToAngle(self.angle, speed=speed)
-        moveForDistance(self.distance, speed=speed)
+        self.rotateToAngle(self.angle, speed=speed)
+        self.moveForDistance(self.distance, speed=speed)
 
         self.x = target_x
         self.y = target_y
