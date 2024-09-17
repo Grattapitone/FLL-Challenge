@@ -1,7 +1,10 @@
-import motor, math, runloop, sys
+import motor, math, runloop, sys, time
 from hub import port, motion_sensor
 
 motion_sensor.reset_yaw(0)
+
+x = 0
+y = 0
 
 wheel_diameter = 8.8
 wheel_circumference = wheel_diameter * math.pi
@@ -9,7 +12,7 @@ wheel_circumference = wheel_diameter * math.pi
 wheel_distance = 8
 drivingbase_360_degrees_turn_circumference = wheel_distance * math.pi
 
-def rotate2angle(angle):        #function for turning to an angle relative to the start position
+def rotate2angle(angle, speed=100):        #function for turning to an angle relative to the start position
     fractionOf360Degrees = (angle + (motion_sensor.tilt_angles()[0] * -0.1)) / 360
     """
         calculates the angle to turn into a fraction of the full circle: your target angle added to the angle to position 0 and divide it by 360,
@@ -18,9 +21,23 @@ def rotate2angle(angle):        #function for turning to an angle relative to th
     """
     degrees = (drivingbase_360_degrees_turn_circumference * fractionOf360Degrees / wheel_circumference) * 360
     """
-        calculates the angle to finally drive for one motor: 
+        calculates the angle to finally drive for one motor:
     """
-    runloop.run(motor.run_for_degrees(port.A, round(degrees), 100), motor.run_for_degrees(port.B, round(degrees), 100))
-rotate2angle(90)
+    runloop.run(motor.run_for_degrees(port.A, round(degrees), speed), motor.run_for_degrees(port.B, round(degrees), speed))
 
-sys.exit()
+
+def moveForDistance(distance, speed=300):
+    degrees_per_cm = 360 / wheel_circumference
+    runloop.run(motor.run_for_degrees(port.A, round(distance*degrees_per_cm), -speed), motor.run_for_degrees(port.B, round(distance*degrees_per_cm), speed))
+
+def MoveToCoordinates(px, py, RotSpeed=100, MoveSpeed=300):
+    global x, y
+    rotate2angle(math.degrees(math.atan2(px - x, py - y)), speed=RotSpeed)
+    moveForDistance(math.sqrt((px - x)**2 + (py - y)**2), speed=MoveSpeed)
+    x = px
+    y = py
+
+MoveToCoordinates(10, 10)
+MoveToCoordinates(0, 0)
+
+sys.exit(0)
