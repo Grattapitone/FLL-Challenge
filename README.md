@@ -10,6 +10,7 @@ Bild von uns allen vor dem Computer
 ### Wenig/Einige/Klare Hinweise auf eine effektive Strategie
 Probleme:
 Kälte; Sicht; Druck; Taucherkrankheit; Kommunikation; Positionierung; Navigation
+taucherkrankheit zu schwierig
 ## 3  Das Team hat eine eigene Idee entwickelt oder auf einer bestehenden aufgebaut. Mit einem Prototypmodell oder einer Zeichnung veranschaulicht das Team die Lösung. 
 ### Wenig/Teilweise/Umfangreiche Entwicklung einer innovativen Lösung
 Gel ist innovativ
