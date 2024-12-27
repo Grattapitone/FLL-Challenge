@@ -8,7 +8,7 @@ Experten erwähnen; Wikipedia; video mit Ben
 ### gesamtes Team:
 Bild von uns allen vor dem Computer
 ### Srategie:
-
+erst Experten, dann Wikipedia, dann Patent
 ## 3
 ### innovative Lösung:
 Gel ist innovativ
@@ -18,7 +18,7 @@ Gel mitbringen
 ### Lösung zeigen
 Lösung den Experten zeigen
 ### Verbesserung
-
+erst falsch, dann richtig 
 ## 5
 ### ansprechende Präsentation
 nicht langweilig
