@@ -8,7 +8,8 @@ Experten erwähnen; Wikipedia; video mit Ben
 ### Wenig/Einige/Klare Hinweise, dass das gesamte Team an der Ideenauswahl beteiligt war
 Bild von uns allen vor dem Computer
 ### Wenig/Einige/Klare Hinweise auf eine effektive Strategie
-erst Experten, dann Wikipedia, dann Patent
+Probleme:
+Kälte; Sicht; Druck; Taucherkrankheit; Kommunikation; Positionierung; Navigation
 ## 3  Das Team hat eine eigene Idee entwickelt oder auf einer bestehenden aufgebaut. Mit einem Prototypmodell oder einer Zeichnung veranschaulicht das Team die Lösung. 
 ### Wenig/Teilweise/Umfangreiche Entwicklung einer innovativen Lösung
 Gel ist innovativ
