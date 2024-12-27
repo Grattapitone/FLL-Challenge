@@ -18,9 +18,9 @@ Gel mitbringen
 ### Lösung zeigen
 Lösung den Experten zeigen
 ### Verbesserung
-nicht langweilig
+
 ## 5
 ### ansprechende Präsentation
-
+nicht langweilig
 ### Lösung
 Taucher könnten länger unterwasser bleiben
