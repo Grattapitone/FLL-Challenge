@@ -18,7 +18,7 @@ Gel mitbringen
 ### Lösung zeigen
 Lösung den Experten zeigen
 ### Verbesserung
-
+nicht langweilig
 ## 5
 ### ansprechende Präsentation
 
