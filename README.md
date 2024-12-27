@@ -9,7 +9,7 @@ Experten erwähnen; Wikipedia; video mit Ben
 Bild von uns allen vor dem Computer
 ### Srategie:
 
-##3
+## 3
 ### innovative Lösung:
 Gel ist innovativ
 ### prototyp:
