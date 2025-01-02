@@ -19,3 +19,4 @@ def Turn2Angle(Angle):
 
 
 Turn2Angle(90)
+sys.exit()
