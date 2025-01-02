@@ -1,5 +1,5 @@
 from hub import port, motion_sensor
-import motor_pair, motor
+import motor_pair, motor, sys
 
 Kp = 1.5
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
@@ -10,3 +10,4 @@ def moveForDistance(distance, wheel_circumference, speed=300):
     motor_pair.move_for_degrees(motor_pair.PAIR_1, round(degrees), round(motion_sensor.tilt_angles()[0]/10 * (100/ 180) * Kp), velocity = speed)
 
 moveForDistance(100,27.5)
+sys.exit()
