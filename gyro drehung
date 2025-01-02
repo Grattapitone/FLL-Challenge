@@ -1,5 +1,5 @@
 from hub import port, motion_sensor
-import motor_pair
+import motor_pair, sys
 from app import linegraph
 
 linegraph.clear_all()
