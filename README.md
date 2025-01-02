@@ -1,3 +1,8 @@
+# This repository only contains code for LEGO spike prime
+
+
+
+
 # Forschungsauftrag
 ## 1  Das Team hat ein Problem klar definiert und dazu gut recherchiert.
 ### Problem nicht klar/teilweise klar/klar definiert
