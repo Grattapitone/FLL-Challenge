@@ -28,6 +28,7 @@ def moveForDistance(distance, speed=300):
     motor_pair.stop(0)
 
 def moveTo(x, y, speed=300):
+    global hub_x, hub_y
     distance = math.sqrt((hub_x - x) ** 2 + (hub_y - y) ** 2)
     angle = math.degrees(math.atan2(hub_y - y, hub_x - x))
     Turn2Angle(angle)
