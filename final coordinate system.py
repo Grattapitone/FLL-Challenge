@@ -1,6 +1,8 @@
 from hub import port, motion_sensor
 import motor_pair, motor, sys, math
 
+motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+
 wheel_diameter = 8.8
 wheel_circumference = wheel_diameter * math.pi
 degrees_per_centimeter = 360 / wheel_circumference
@@ -8,14 +10,12 @@ degrees_per_centimeter = 360 / wheel_circumference
 hub_x, hub_y = 0, 0
 
 def Turn2Angle(angle):
-    i=0
     while -(motion_sensor.tilt_angles()[0] / 10) < angle:
         if round((motion_sensor.tilt_angles()[0]) / 10 + angle) > 50:
-            motor_pair.move(0,100,velocity = round((motion_sensor.tilt_angles()[0]) / 10 + angle))
+            motor_pair.move(motor_pair.PAIR_1,100,velocity = round((motion_sensor.tilt_angles()[0]) / 10 + angle))
         else:
-            motor_pair.move(0,100,velocity = 50)
-        i+=1
-    motor_pair.stop(0)
+            motor_pair.move(motor_pair.PAIR_1,100,velocity = 50)
+    motor_pair.stop(motor_pair.PAIR_1)
 
 Kp = 1.5
 
@@ -25,7 +25,7 @@ def moveForDistance(distance, speed=300):
     motor_beg_pos = motor.absolute_position(port.A)     # beginning position of the Motor
     while motor.relative_position(port.A) - motor_beg_pos < degrees:
         motor_pair.move(motor_pair.PAIR_1, round(motion_sensor.tilt_angles()[0]/10 * (100/ 180) * Kp), velocity = speed)
-    motor_pair.stop(0)
+    motor_pair.stop(motor_pair.PAIR_1)
 
 def moveTo(x, y, speed=300):
     global hub_x, hub_y
