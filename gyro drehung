@@ -6,16 +6,13 @@ linegraph.clear_all()
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
 
 def Turn2Angle(Angle):
-    i=0
     while -(motion_sensor.tilt_angles()[0] / 10) < Angle:
         if round((motion_sensor.tilt_angles()[0]) / 10 + Angle) > 50:
-            motor_pair.move(0,100,velocity = round((motion_sensor.tilt_angles()[0]) / 10 + Angle))
+            motor_pair.move(motor_pair.PAIR_1,100,velocity = round((motion_sensor.tilt_angles()[0]) / 10 + Angle))
         else:
-            motor_pair.move(0,100,velocity = 50)
+            motor_pair.move(motor_pair.PAIR_1,100,velocity = 50)
         linegraph.plot(2, i, round((motion_sensor.tilt_angles()[0]) / 10 + Angle))
-        i+=1
-    motor_pair.stop(0)
-    linegraph.plot(0,i,round((motion_sensor.tilt_angles()[0]) / 10 + Angle))
+    motor_pair.stop(motor_pair.PAIR_1)
 
 
 Turn2Angle(90)
