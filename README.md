@@ -1,10 +1,4 @@
-# final coord system "final coordinate system.py", https://github.com/Grattapitone/FLL-Challenge/blob/main/final%20coordinate%20system.py
-
 # This repository only contains code for LEGO spike prime
-
-
-
-
 # Forschungsauftrag
 ## 1  Das Team hat ein Problem klar definiert und dazu gut recherchiert.
 ### Problem nicht klar/teilweise klar/klar definiert
