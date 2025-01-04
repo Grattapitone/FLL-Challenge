@@ -1,0 +1,43 @@
+from hub import port, motion_sensor
+import motor_pair, sys
+
+motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+
+def ConvertToRobotDegrees(CompassHeading):      # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
+    RobotDegrees = CompassHeading * 10          # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
+    RobotDegrees = RobotDegrees % 3600          # This is what we want if CompassHeading is between 1800 and 3600
+    if RobotDegrees > 1800 and RobotDegrees < 3600:
+        RobotDegrees = RobotDegrees - 3600
+    return RobotDegrees
+
+def current_heading_RD():                           # This returns the current position of the Robot in Decidegrees
+    return -motion_sensor.tilt_angles()[0]          # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
+
+def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading):
+    SmallestAngle = EndCompassHeading - StartingCompassHeading
+    if SmallestAngle > 180:
+        SmallestAngle -= 360
+    elif SmallestAngle < -180:
+        SmallestAngle += 360
+    return SmallestAngle
+
+
+def Turn2Heading(TargetCompassHeading):
+    if ConvertToRobotDegrees(TargetCompassHeading) >= 0:
+        while current_heading_RD() < round(ConvertToRobotDegrees(TargetCompassHeading)):
+            if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
+                motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            else:
+                motor_pair.move(0,100,velocity = 50)
+    else:
+        while current_heading_RD() > round(ConvertToRobotDegrees(TargetCompassHeading)):
+            if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) > -50:
+                motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            else:
+                motor_pair.move(0,100,velocity = -50)
+    motor_pair.stop(0)
+
+
+Turn2Heading(-90)
+Turn2Heading(0)
+sys.exit()
