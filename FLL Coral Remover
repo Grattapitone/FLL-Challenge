@@ -1,0 +1,83 @@
+from hub import port, motion_sensor
+import motor_pair, motor, sys, runloop, time
+from app import linegraph
+
+motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+linegraph.clear_all()
+
+#                                                              GERADEAUS                                                                                                           #
+####################################################################################################################################################################################
+
+Kp = 1.5        # Proportional constant
+
+def moveForDistance(distance, speed=300):
+    motor.reset_relative_position(port.A,0)
+    heading = motion_sensor.tilt_angles()[0]
+    degrees_per_centimeter = 360 / 27.5
+    degrees = distance * degrees_per_centimeter        # total degrees the motors have to turn
+    while motor.relative_position(port.A) < degrees:
+        #correction = motion_sensor.tilt_angles()[0] - heading
+        motor_pair.move(motor_pair.PAIR_1, round((motion_sensor.tilt_angles()[0] - heading) / 10 * (100 / 180) * Kp), velocity = speed)
+        #motor_pair.move_tank(motor_pair.PAIR_1, speed + correction, speed - correction)
+    motor_pair.stop(0)
+
+#                                                                DREHEN                                                                                                            #
+####################################################################################################################################################################################
+
+def ConvertToRobotDegrees(CompassHeading):    # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
+    RobotDegrees = CompassHeading * 10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
+    RobotDegrees = RobotDegrees % 3600        # This is what we want if CompassHeading is between 1800 and 3600
+    if RobotDegrees > 1800 and RobotDegrees < 3600:
+        RobotDegrees = RobotDegrees - 3600
+    return RobotDegrees
+
+def current_heading_RD():                        # This returns the current position of the Robot in Decidegrees
+    return -motion_sensor.tilt_angles()[0]        # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
+
+def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading):
+    SmallestAngle = EndCompassHeading - StartingCompassHeading
+    if SmallestAngle > 180:
+        SmallestAngle -= 360
+    elif SmallestAngle < -180:
+        SmallestAngle += 360
+    return SmallestAngle
+
+
+def Turn2Heading(TargetCompassHeading, speed = 100):
+    #i=0
+    if ConvertToRobotDegrees(TargetCompassHeading) >= 0:
+        while current_heading_RD() < round(ConvertToRobotDegrees(TargetCompassHeading)):
+            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
+            #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            #else:
+            motor_pair.move(0,100,velocity = speed)
+    else:
+        while current_heading_RD() > round(ConvertToRobotDegrees(TargetCompassHeading)):
+            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) > -50:
+            #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            #else:
+            motor_pair.move(0,100,velocity = -speed)
+    motor_pair.stop(0)
+
+
+#                                                                  RUN                                                                                                             #
+####################################################################################################################################################################################
+async def main():
+    motion_sensor.reset_yaw(-900)
+    time.sleep_ms(5)
+
+    # remove corals
+    moveForDistance(34)
+    time.sleep_ms(10)
+    Turn2Heading(-35)
+    time.sleep_ms(10)
+    moveForDistance(27)
+    time.sleep_ms(10)
+    while -motion_sensor.tilt_angles()[0] > -1600:
+        motor.run(port.B,100)
+    motor.stop(port.B)
+    time.sleep_ms(10)
+    moveForDistance(50)
+
+runloop.run(main())
+sys.exit(0)
