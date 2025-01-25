@@ -5,7 +5,7 @@ from app import linegraph
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
 linegraph.clear_all()
 
-#                                                            GERADEAUS                                                                                                        #
+#                                                                 GERADEAUS                                                                                                        #
 ####################################################################################################################################################################################
 
 Kp = 1.5        # Proportional constant
@@ -52,7 +52,7 @@ def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading):
 
 def Turn2Heading(TargetCompassHeading, speed = 100):
     #i=0
-    if ConvertToRobotDegrees(TargetCompassHeading) >= 0:
+    if SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
         while current_heading_RD() < round(ConvertToRobotDegrees(TargetCompassHeading)):
             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
             #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
@@ -78,37 +78,31 @@ async def main():
     moveForDistance(100, 500)
     time.sleep_ms(5)
 
-    moveForDistance(-5.9, 200)
+    moveForDistance(-4, 200)
     time.sleep_ms(5)
 
     Turn2Heading(0)
     time.sleep_ms(5)
 
-    await motor.run_for_degrees(port.F, -300, 200)
+    await motor.run_for_degrees(port.F, -150, 200)
+    time.sleep_ms(5)
+
+    await motor.run_for_degrees(port.F, 240, 200)
     time.sleep_ms(5)
 
     # Hai
 
-    Turn2Heading(-10)
+    Turn2Heading(35)
     time.sleep_ms(5)
 
-    await motor.run_to_relative_position(port.F, 0, 200)
+    moveForDistance(-15, 400)
     time.sleep_ms(5)
 
-    Turn2Heading(-50)
-    time.sleep_ms(5)
-
-    moveForDistance(-0.5, 200)
-    time.sleep_ms(5)
-
-    await motor.run_for_degrees(port.F, 300, 200)
-    time.sleep_ms(5)
-    
-    await motor.run_to_relative_position(port.F, 0, 200)
-    time.sleep_ms(5)
+    moveForDistance(10, 400)
+    time.sleep_ms(100)
 
     Turn2Heading(0)
-    time.sleep_ms(5)
+    time.sleep(1)
 
     moveForDistance(-100)
 
