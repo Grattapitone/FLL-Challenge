@@ -43,6 +43,8 @@ def Turn2Heading(TargetCompassHeading, speed = 50):
 
 #print(ConvertToRobotDegrees(50))
 #print(SmallestAngleBetweenTwoHeadings(90,270))
-Turn2Heading(90)
+Turn2Heading(-90)
 Turn2Heading(180)
+Turn2Heading(0)
+Turn2Heading(90)
 sys.exit()
