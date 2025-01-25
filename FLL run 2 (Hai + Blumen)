@@ -53,13 +53,13 @@ def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading):
 def Turn2Heading(TargetCompassHeading, speed = 100):
     #i=0
     if SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
-        while current_heading_RD() < round(ConvertToRobotDegrees(TargetCompassHeading)):
+        while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0: #current_heading_RD() < round(ConvertToRobotDegrees(TargetCompassHeading)):
             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
             #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
             #else:
             motor_pair.move(0,100,velocity = speed)
     else:
-        while current_heading_RD() > round(ConvertToRobotDegrees(TargetCompassHeading)):
+        while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) <= 0: #current_heading_RD() > round(ConvertToRobotDegrees(TargetCompassHeading)):
             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) > -50:
             #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
             #else:
