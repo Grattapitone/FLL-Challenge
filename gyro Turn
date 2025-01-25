@@ -1,8 +1,6 @@
 from hub import port, motion_sensor
 import motor_pair, sys
-from app import linegraph
 
-linegraph.clear_all()
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
 
 def ConvertToRobotDegrees(CompassHeading):    # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
