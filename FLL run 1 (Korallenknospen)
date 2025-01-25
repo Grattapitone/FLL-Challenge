@@ -5,7 +5,7 @@ from app import linegraph
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
 linegraph.clear_all()
 
-#                                                            GERADEAUS                                                                                                        #
+#                                                                 GERADEAUS                                                                                                        #
 ####################################################################################################################################################################################
 
 Kp = 1.5        # Proportional constant
