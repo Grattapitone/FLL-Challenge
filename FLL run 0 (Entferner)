@@ -1,5 +1,11 @@
+from hub import port, motion_sensor
+import motor_pair, motor, sys, runloop, time
+from app import linegraph
 
-#                                                            GERADEAUS                                                                                                        #
+motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+linegraph.clear_all()
+
+#                                                                 GERADEAUS                                                                                                        #
 ####################################################################################################################################################################################
 
 Kp = 1.5        # Proportional constant
@@ -59,3 +65,26 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
             #else:
             motor_pair.move(0,100,velocity = -speed)
     motor_pair.stop(0)
+
+
+#                                                                  RUN                                                                                                             #
+####################################################################################################################################################################################
+async def main():
+    motion_sensor.reset_yaw(-900)
+    time.sleep_ms(5)
+
+    # remove corals
+    moveForDistance(38)
+    time.sleep_ms(10)
+    Turn2Heading(-35)
+    time.sleep_ms(10)
+    moveForDistance(29)
+    time.sleep_ms(10)
+    while -motion_sensor.tilt_angles()[0] > -1600:
+        motor.run(port.B,100)
+    motor.stop(port.B)
+    time.sleep_ms(10)
+    moveForDistance(50)
+
+runloop.run(main())
+sys.exit(0)
