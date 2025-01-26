@@ -15,14 +15,10 @@ def moveForDistance(distance, speed=300):
     degrees = distance * degrees_per_centimeter        # total degrees the motors have to turn
     if (degrees > 0):
         while motor.relative_position(port.A) < degrees:
-            #correction = motion_sensor.tilt_angles()[0] - heading
             motor_pair.move(motor_pair.PAIR_1, round((motion_sensor.tilt_angles()[0] - heading) / 10 * (100 / 180) * Kp), velocity = speed)
-            #motor_pair.move_tank(motor_pair.PAIR_1, speed + correction, speed - correction)
     else:
         while motor.relative_position(port.A) > degrees:
-            #correction = motion_sensor.tilt_angles()[0] - heading
             motor_pair.move(motor_pair.PAIR_1, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
-            #motor_pair.move_tank(motor_pair.PAIR_1, speed + correction, speed - correction)
 
     motor_pair.stop(0)
 
@@ -52,15 +48,9 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
     #i=0
     if SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
         while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
-            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
-            #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
-            #else:
             motor_pair.move(0,100,velocity = speed)
     else:
         while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) <= 0:
-            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) > -50:
-            #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
-            #else:
             motor_pair.move(0,100,velocity = -speed)
     motor_pair.stop(0)
 
@@ -99,7 +89,7 @@ async def main():
     moveForDistance(10, 400)
     time.sleep_ms(100)
 
-    Turn2Heading(0)
+    Turn2Heading(10)
     time.sleep(1)
 
     moveForDistance(-100)
