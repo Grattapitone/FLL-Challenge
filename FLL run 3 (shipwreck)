@@ -21,6 +21,7 @@ def moveForDistance(distance, speed=300):
             motor_pair.move(motor_pair.PAIR_1, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
 
     motor_pair.stop(0)
+    time.sleep_ms(5)
 
 #                                                                DREHEN                                                                                                            #
 ####################################################################################################################################################################################
@@ -53,17 +54,27 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
         while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) <= 0:
             motor_pair.move(0,100,velocity = -speed)
     motor_pair.stop(0)
+    time.sleep_ms(5)
+
+def reset_yaw(heading):
+    motion_sensor.reset_yaw(-ConvertToRobotDegrees(heading))
+    time.sleep_ms(5)
 
 #                                                                RUN                                                                                                            #
 ####################################################################################################################################################################################
 async def main():
-    motion_sensor.reset_yaw(0)
-    time.sleep_ms(5)
+    reset_yaw(0)
     moveForDistance(40)
     Turn2Heading(90)
-    moveForDistance(30, 100)
+    moveForDistance(27, 100)
     Turn2Heading(100)
-    moveForDistance(120)
+    moveForDistance(70)
+    #Turn2Heading(35)
+    await motor.run_for_degrees(port.A, 250, 600)
+    time.sleep_ms(300)
+    moveForDistance(8)
+    Turn2Heading(130)
+    moveForDistance(60, 400)
 
 runloop.run(main())
 sys.exit(0)
