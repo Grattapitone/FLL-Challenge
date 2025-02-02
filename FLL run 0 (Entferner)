@@ -1,9 +1,7 @@
 from hub import port, motion_sensor
 import motor_pair, motor, sys, runloop, time
-from app import linegraph
 
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
-linegraph.clear_all()
 
 #                                                                 GERADEAUS                                                                                                        #
 ####################################################################################################################################################################################
@@ -23,6 +21,7 @@ def moveForDistance(distance, speed=300):
             motor_pair.move(motor_pair.PAIR_1, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
 
     motor_pair.stop(0)
+    time.sleep_ms(5)
 
 #                                                                DREHEN                                                                                                            #
 ####################################################################################################################################################################################
@@ -55,25 +54,25 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
         while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) <= 0:
             motor_pair.move(0,100,velocity = -speed)
     motor_pair.stop(0)
+    time.sleep_ms(5)
+
+def reset_yaw(heading):
+    motion_sensor.reset_yaw(-ConvertToRobotDegrees(heading))
+    time.sleep_ms(5)
 
 
 #                                                                  RUN                                                                                                             #
 ####################################################################################################################################################################################
 async def main():
-    motion_sensor.reset_yaw(-900)
-    time.sleep_ms(5)
+    reset_yaw(90)
 
     # remove corals
     moveForDistance(38)
-    time.sleep_ms(10)
     Turn2Heading(-35)
-    time.sleep_ms(10)
     moveForDistance(29)
-    time.sleep_ms(10)
     while -motion_sensor.tilt_angles()[0] > -1600:
         motor.run(port.B,100)
     motor.stop(port.B)
-    time.sleep_ms(10)
     moveForDistance(50)
 
 runloop.run(main())
