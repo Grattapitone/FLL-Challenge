@@ -60,17 +60,18 @@ def reset_yaw(heading):
     motion_sensor.reset_yaw(-ConvertToRobotDegrees(heading))
     time.sleep_ms(5)
 
-#                                                                RUN                                                                                                            #
+#                                                                RUN                                                                                                               #
 ####################################################################################################################################################################################
 async def main():
     reset_yaw(0)
-    moveForDistance(40)
+    moveForDistance(60, 200)
+    moveForDistance(-15)
     Turn2Heading(90)
     moveForDistance(27, 100)
     Turn2Heading(100)
     moveForDistance(70)
     #Turn2Heading(35)
-    await motor.run_for_degrees(port.A, 250, 600)
+    await motor.run_for_degrees(port.A, 350, 600)
     time.sleep_ms(300)
     moveForDistance(8)
     Turn2Heading(130)
