@@ -1,7 +1,23 @@
 from hub import port, motion_sensor
-import motor, motor_pair
+import motor_pair, motor, sys, time
 
-Kp = 1.5
 motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
-while True:
-    motor_pair.move(0,round(motion_sensor.tilt_angles()[0]/10*(100/ 180)*Kp),velocity = 600)
+Kp = 1.5        # Proportional constant
+
+def moveForDistance(distance, speed=300):
+    motor.reset_relative_position(port.A,0)
+    heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
+    degrees_per_centimeter = 360 / 27.5
+    degrees = distance * degrees_per_centimeter         # total degrees the motors have to turn
+    if (degrees > 0):                                   # basically "if you want the robot to move forward, then"
+        while motor.relative_position(port.A) < degrees:
+            motor_pair.move(motor_pair.PAIR_1, round((motion_sensor.tilt_angles()[0] - heading) / 10 * (100 / 180) * Kp), velocity = speed)
+    else:
+        while motor.relative_position(port.A) > degrees:
+            motor_pair.move(motor_pair.PAIR_1, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
+
+    motor_pair.stop(0)
+    time.sleep_ms(5)
+
+moveForDistance(60)
+sys.exit()
