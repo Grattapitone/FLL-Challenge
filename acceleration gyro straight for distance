@@ -22,18 +22,22 @@ def moveForDistance(distance):
                 i += 1
             else:
                 speed = round(((-(motor.relative_position(port.A) - degrees)) / degrees) * 1050)
-                #linegraph.plot(4,i,0)
                 i += 1
             linegraph.plot(2,i,speed)
-            #linegraph.plot(0, i, motor.relative_position(port.A))
-            #linegraph.plot(1, i, motor.relative_position(port.A) - speed)
     else:
         while motor.relative_position(port.A) > degrees:
+            speed += 100
             motor_pair.move(motor_pair.PAIR_1, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
-            speed -= 1
+            if motor.relative_position(port.A) < degrees / 2:
+                speed = round(motor.relative_position(port.A) / -(degrees) * 2 * 1050)            # 1050 because max speed for large motors
+                i += 1
+            else:
+                speed = round(((-(motor.relative_position(port.A) + degrees)) / (-degrees)) * 1050)
+                i += 1
+            linegraph.plot(2,i,speed)
 
     motor_pair.stop(0)
     time.sleep_ms(5)
 
-moveForDistance(100)
+moveForDistance(-100)
 sys.exit()
