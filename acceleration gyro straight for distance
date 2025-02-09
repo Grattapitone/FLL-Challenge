@@ -1,0 +1,35 @@
+from hub import port, motion_sensor
+import motor_pair, motor, sys, time
+from app import linegraph
+
+motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+Kp = 1.5        # Proportional constant
+linegraph.clear_all()
+
+def moveForDistance(distance):
+    motor.reset_relative_position(port.A,0)
+    heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
+    degrees_per_centimeter = 360 / 27.5
+    degrees = distance * degrees_per_centimeter        # total degrees the motors have to turn
+    speed = 0
+    i = 0
+    if (degrees > 0):                                # basically "if you want the robot to move forward, then"
+        while motor.relative_position(port.A) < degrees:
+            motor_pair.move(motor_pair.PAIR_1, round((motion_sensor.tilt_angles()[0] - heading) / 10 * (100 / 180) * Kp), velocity = speed)
+            if motor.relative_position(port.A) < degrees / 2:
+                speed += 1
+                i += 1
+            else:
+                speed -= 1
+                i += 1
+            linegraph.plot(2,i,speed)
+    else:
+        while motor.relative_position(port.A) > degrees:
+            motor_pair.move(motor_pair.PAIR_1, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
+            speed -= 1
+
+    motor_pair.stop(0)
+    time.sleep_ms(5)
+
+moveForDistance(2000)
+sys.exit()
