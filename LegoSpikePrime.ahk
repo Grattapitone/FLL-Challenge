@@ -33,4 +33,7 @@ when you press control-s
         FileAppend(A_Clipboard, FileToSave)
     }
 }
+F5::{
+    Send "{Click 1855 940}"
+}
 #HotIf
