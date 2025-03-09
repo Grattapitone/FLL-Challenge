@@ -8,8 +8,7 @@ This repository only contains code for LEGO spike prime.
 > We don't compensate any damage that our code caused.  
 > Use it at your own risk.  
 
-<img src="/continental-logo.png" height="100px"/>
-<img src="/ContiMindsLogo.png" height="100px"/>
+<img src="/continental-logo.png" height="100px"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="/ContiMindsLogo.png" height="100px"/>
 
 ## Table of Contents
 - [About](#about)
