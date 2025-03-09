@@ -9,7 +9,7 @@ This repository only contains code for LEGO spike prime.
 > Use it at your own risk.  
 
 <img src="https://contiminds.github.io/assets/imgs/continental-logo.png" height="100px">
-<img src="/ContiMindsLogo.svg" height="100px">
+<img src="/ContiMindsLogo.png" height="100px">
 
 ## Table of Contents
 - [About](#about)
