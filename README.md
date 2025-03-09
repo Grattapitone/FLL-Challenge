@@ -10,15 +10,23 @@ This repository only contains code for LEGO spike prime.
 
 <img src="https://contiminds.github.io/assets/imgs/continental-logo.png" height="100px">
 
+## Table of Contents
+- [About](#about)
+  - [Contact](#contact)
+  - [Members + Coach](#members--coach)
+
 ## About
 Our Slogan: **Building Tomorrow, Brick By Brick.**
 
-<!-- ### Contact
+### Contact
 + Email:
-+ Telephone
-  -->
++ Telephone:
++ Website: [contiminds.github.io](https://contiminds.github.io/ "ContiMinds")
+
 ### Members + Coach
 + [@C-PLUS-PLUSandPYTHON](https://github.com/C-PLUS-PLUSandPYTHON "Member")
 + [@Alastrantia](https://github.com/Alastrantia "Member")
 + [@Grattapitone](https://github.com/Grattapitone "Member")
 + [Luca Ivaldi](https:// "Coach")
+
+⤴️ [**Back to Top**](#contiminds)
