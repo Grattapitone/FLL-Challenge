@@ -4,7 +4,6 @@ import motor_pair, motor, sys, time
 ########################   CONFIGURATION   #############################################################################################################################################
 
 wheel_circumference = 27.5
-# left-right = A-B; blue or white; 
 left_motor = port.A
 right_motor = port.B
 blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False
