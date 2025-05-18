@@ -80,13 +80,12 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
 def GoTo(currentx, currenty, targetx, targety):
     differencex = targetx - currentx
     differencey = targety - currenty
-    theta = math.degrees(math.atan(differencey / differencex))
+    theta = math.degrees(math.atan(differencey / differencex))      #theta is the angle at which the robot has to turn
     Turn2Heading(90 - theta)
     moveForDistance(math.sqrt(differencex**2 + differencey**2))
 
-print(math.atan(1))
-print(math.degrees(math.atan(1)))
+print(math.atan(-1))
+print(math.degrees(math.atan(-1)))
 GoTo(0, 0, 50, 50)
-GoTo(50, 50, 0, 0)
 
 sys.exit(0)
