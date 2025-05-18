@@ -22,7 +22,7 @@ motor_pair.pair(drive_motors, right_motor, left_motor)
 
 degrees_per_centimeter = 360 / wheel_circumference
 
-Kp = 1.5        # Proportional constant
+Kp = 1.0        # Proportional constant
 
 def moveForDistance(distance, speed=300):
     motor.reset_relative_position(left_motor,0)
@@ -77,10 +77,9 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
 
 ########################   END OF TURN   ######################################################################################################################################
 
-moveForDistance(40)
-Turn2Heading(-90)
-moveForDistance(30)
-Turn2Heading(-210)
-moveForDistance(50)
-Turn2Heading(0)
+moveForDistance(80)
+Turn2Heading(90)
+moveForDistance(133)
+Turn2Heading(47)
+
 sys.exit(0)
