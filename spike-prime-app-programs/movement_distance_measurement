@@ -1,0 +1,24 @@
+4445464748495051434241403938373635
+        linegraph.plot(1, i, motion_sensor.acceleration(False)[0])        linegraph.plot(2, i, motion_sensor.acceleration(False)[1])        i += 1        time.sleep_ms(1)for _ in range(10):    moveForDistance(30)    Kp += 0.1    for c in range(10):    motor_pair.stop(0)            i += 1            linegraph.plot(2, i, motion_sensor.acceleration(False)[1])            linegraph.plot(1, i, motion_sensor.acceleration(False)[0])            motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)        while motor.relative_position(left_motor) > degrees:    else:
+
+    motor_pair.stop(0)
+    for c in range(10):
+        linegraph.plot(1, i, motion_sensor.acceleration(False)[0])
+        linegraph.plot(2, i, motion_sensor.acceleration(False)[1])
+        i += 1
+        time.sleep_ms(1)
+
+for _ in range(10):
+    moveForDistance(30)
+
+Find
+No results
+7:23:00 PM: Compiled-------------7:23:18 PM: Compiled-------------7:24:59 PM: Compiled-------------
+acceleration(raw_unfiltered: bool) -> tuple[int, int, int]
+
+Returns a tuple containing x, y & z acceleration values as integers. The values are mili G, so 1 / 1000 G
+
+Parameters
+raw_unfiltered: bool
+If we want the data back raw and unfiltered
+
