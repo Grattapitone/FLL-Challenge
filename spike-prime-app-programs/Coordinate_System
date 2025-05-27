@@ -8,6 +8,9 @@ left_motor = port.A
 right_motor = port.B
 blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False
 
+hub_x = 0                   #the coordinates where the robot starts
+hub_y = 0
+
 ########################END OF CONFIGURATION######################################################################################################################################
 
 if blue_outboard == True:
@@ -77,33 +80,30 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
 
 ########################   COORDINATE SYSTEM   ######################################################################################################################################
 
-def DriveTo(currentx, currenty, targetx, targety):
-    differencex = targetx - currentx
-    differencey = targety - currenty
+def DriveTo(targetx, targety):
+    global hub_x
+    global hub_y
+    differencex = targetx - hub_x
+    differencey = targety - hub_y
     targetheading = 0
     if differencex == 0:
         if differencey > 0:
-            #Turn2Heading(0)
             targetheading = 0
         else:
-            #Turn2Heading(180)
             targetheading = 180
     else:
-        theta = math.degrees(math.atan(differencey / differencex))      #theta is the angle by which the robot has to turn
-        if differencex > 0:
-            #Turn2Heading(90 - theta)
-            targetheading = 90 - theta
-        elif differencex < 0:
-            #Turn2Heading(-90 - theta)
-            targetheading = -90 - theta
+        targetheading = math.degrees(math.atan2(differencex, differencey))
     Turn2Heading(targetheading)
     moveForDistance(math.sqrt(differencex**2 + differencey**2))
+    hub_x = targetx
+    hub_y = targety
 
 print(math.atan(-1))
 print(math.degrees(math.atan(-1)))
-DriveTo(0, 0, 100, 0)
-DriveTo(100, 0, 100, -50)
-DriveTo(100, -50, 0, 0)
+DriveTo(0, 50)
+DriveTo(50, 50)
+DriveTo(50, 0)
+DriveTo(0, 0)
 Turn2Heading(0)
 
 sys.exit(0)
