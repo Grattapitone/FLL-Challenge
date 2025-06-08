@@ -17,7 +17,13 @@ acceleration_offset_forward = measurement_sum_forward / 5000
 light_matrix.show_image(light_matrix.IMAGE_YES)
 #END CALIBRATING
 
-linegraph.clear_all()
+do_linegraph = True
+try:
+    linegraph.clear_all()
+    light_matrix.write("app")
+except:
+    do_linegraph = False
+    light_matrix.write("hub")
 
 acceleration_forward = 0
 velocity_forward = 0
@@ -27,7 +33,7 @@ start_time = time.ticks_ms()
 current_time = time.ticks_ms() - start_time
 previous_time = current_time
 
-while current_time < 30000:
+while current_time < 5000:
     current_time = time.ticks_ms() - start_time
     difference_time = current_time - previous_time
 
@@ -36,10 +42,15 @@ while current_time < 30000:
     distance_forward = distance_forward + (velocity_forward * difference_time)                      # ---> 9,81 m / 1.000.000.000
     meters_moved = (distance_forward / 1000000000) * 9.81
 
-    linegraph.plot(color.RED,current_time,acceleration_forward/1000)
-    linegraph.plot(color.BLUE,current_time,(velocity_forward/1000000)*9.81)
-    linegraph.plot(color.GREEN,current_time,meters_moved)
+    if do_linegraph:
+        linegraph.plot(color.RED,current_time,acceleration_forward/1000)
+        linegraph.plot(color.BLUE,current_time,(velocity_forward/1000000)*9.81)
+        linegraph.plot(color.GREEN,current_time,meters_moved)
 
     previous_time = current_time
+
+light_matrix.write(str(meters_moved))
+
+time.sleep(3)
 
 sys.exit()
