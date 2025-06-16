@@ -100,10 +100,18 @@ def DriveTo(targetx, targety):
 
 print(math.atan(-1))
 print(math.degrees(math.atan(-1)))
-DriveTo(0, 50)
-DriveTo(50, 50)
-DriveTo(50, 0)
+DriveTo(40, 0)
+DriveTo(40, 30)
 DriveTo(0, 0)
 Turn2Heading(0)
 
 sys.exit(0)
+"""
+a = 1m/s^2
+t = 1s
+d = 1/2 * t^2 * a
+
+v = 9,81 m/s
+t = 1s
+d = t * v = 1g * 1s = 9,81m/s * s = 9,81m
+"""
