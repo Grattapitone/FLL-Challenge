@@ -8,8 +8,8 @@ left_motor = port.A
 right_motor = port.B
 blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False
 
-hub_x = 0                   #the coordinates where the robot starts
-hub_y = 0
+hub_x = 8                   #the coordinates where the robot starts
+hub_y = 8
 
 ########################END OF CONFIGURATION######################################################################################################################################
 
@@ -98,11 +98,10 @@ def DriveTo(targetx, targety):
     hub_x = targetx
     hub_y = targety
 
-print(math.atan(-1))
-print(math.degrees(math.atan(-1)))
-DriveTo(40, 0)
-DriveTo(40, 30)
-DriveTo(0, 0)
+DriveTo(50, 8)
+DriveTo(50, 60)
+DriveTo(8, 60)
+DriveTo(8, 8)
 Turn2Heading(0)
 
 sys.exit(0)
