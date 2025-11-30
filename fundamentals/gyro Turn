@@ -1,7 +1,16 @@
 from hub import port, motion_sensor
 import motor_pair, sys
 
-motor_pair.pair(motor_pair.PAIR_1, port.B, port.A)
+########################CONFIGURATION#############################################################################################################################################
+
+left_motor = port.A
+right_motor = port.B
+drive_motors = motor_pair.PAIR_1
+blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False
+
+########################END OF CONFIGURATION######################################################################################################################################
+
+motor_pair.pair(drive_motors, left_motor, right_motor)
 
 def ConvertToRobotDegrees(CompassHeading):    # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
     RobotDegrees = CompassHeading * 10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
@@ -22,27 +31,27 @@ def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading):
     return SmallestAngle
 
 
-def Turn2Heading(TargetCompassHeading, speed = 50):
+def Turn2Heading(TargetCompassHeading, speed = 100):
     #i=0
     if SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
         while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
-            #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
             #else:
-            motor_pair.move(0,100,velocity = speed)
+            motor_pair.move(drive_motors,100,velocity = speed)
     else:
         while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) <= 0:
             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) > -50:
-            #    motor_pair.move(0,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
             #else:
-            motor_pair.move(0,100,velocity = -speed)
+            motor_pair.move(drive_motors,100,velocity = -speed)
     motor_pair.stop(0)
 
 
 #print(ConvertToRobotDegrees(50))
 #print(SmallestAngleBetweenTwoHeadings(90,270))
+Turn2Heading(-179)
 Turn2Heading(-90)
-Turn2Heading(180)
-Turn2Heading(0)
 Turn2Heading(90)
+Turn2Heading(0)
 sys.exit()
