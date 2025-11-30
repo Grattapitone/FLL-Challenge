@@ -1,0 +1,85 @@
+from hub import port, motion_sensor
+import motor_pair, motor, sys, time
+
+########################CONFIGURATION#############################################################################################################################################
+
+wheel_circumference = 27.5
+right_motor = port.A
+left_motor = port.B
+blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False (we usually have it outboard)
+
+########################END OF CONFIGURATION######################################################################################################################################
+
+if blue_outboard == True:
+    direction = -1
+else:
+    direction = 1
+
+drive_motors = motor_pair.PAIR_1
+motor_pair.pair(drive_motors, left_motor, right_motor)
+
+########################STRAIGHT######################################################################################################################################
+
+degrees_per_centimeter = 360 / wheel_circumference
+
+Kp = 1.0        # Proportional constant
+
+def moveForDistance(distance, speed=300):
+    motor.reset_relative_position(right_motor,0)
+    heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
+    degrees = distance * degrees_per_centimeter * direction        # total degrees the motors have to turn
+    if degrees > 0:                                # basically "if you want the robot to move forward, then"
+        while motor.relative_position(right_motor) < degrees:
+            motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - heading) / 10 * (100 / 180) * Kp), velocity = speed)
+    else:
+        while motor.relative_position(right_motor) > degrees:
+            motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
+
+    motor_pair.stop(0)
+    time.sleep_ms(5)
+
+########################TURN######################################################################################################################################
+
+def ConvertToRobotDegrees(CompassHeading):    # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
+    RobotDegrees = CompassHeading * 10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
+    RobotDegrees = RobotDegrees % 3600        # This is what we want if CompassHeading is between 1800 and 3600
+    if RobotDegrees > 1800 and RobotDegrees < 3600:
+        RobotDegrees = RobotDegrees - 3600
+    return RobotDegrees
+
+def current_heading_RD():                        # This returns the current position of the Robot in Decidegrees
+    return -motion_sensor.tilt_angles()[0]        # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
+
+def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading):
+    SmallestAngle = EndCompassHeading - StartingCompassHeading
+    if SmallestAngle > 180:
+        SmallestAngle -= 360
+    elif SmallestAngle < -180:
+        SmallestAngle += 360
+    return SmallestAngle
+
+
+def Turn2Heading(TargetCompassHeading, speed = 100):
+    #i=0
+    if SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
+        while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) >= 0:
+            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) < 50:
+            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            #else:
+            motor_pair.move(drive_motors,100,velocity = speed)
+    else:
+        while SmallestAngleBetweenTwoHeadings(current_heading_RD() / 10 % 360, TargetCompassHeading) <= 0:
+            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading)) > -50:
+            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+            #else:
+            motor_pair.move(drive_motors,100,velocity = -speed)
+    motor_pair.stop(0)
+
+########################END OF TURN######################################################################################################################################
+
+moveForDistance(74)
+Turn2Heading(30)
+Turn2Heading(-20)
+moveForDistance(-80)
+
+sys.exit(0)
