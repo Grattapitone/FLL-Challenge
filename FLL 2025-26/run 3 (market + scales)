@@ -1,5 +1,5 @@
 from hub import port, motion_sensor
-import motor_pair, motor, sys, time
+import motor_pair, motor, sys, time, runloop
 
 ########################CONFIGURATION#############################################################################################################################################
 
@@ -77,8 +77,13 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
 
 ########################END OF TURN######################################################################################################################################
 
-moveForDistance(45)
-#Turn2Heading(-20)
-moveForDistance
+async def main():
+    moveForDistance(45)
+    await motor.run_for_degrees(port.E,100,400)
+    await motor.run_for_degrees(port.E,-150,400)
+    Turn2Heading(-30)
+    moveForDistance(-60)
+
+runloop.run(main())
 
 sys.exit(0)
