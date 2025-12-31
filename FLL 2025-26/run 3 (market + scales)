@@ -79,8 +79,8 @@ def Turn2Heading(TargetCompassHeading, speed = 100):
 
 async def main():
     moveForDistance(45)
-    await motor.run_for_degrees(port.E,100,400)
-    await motor.run_for_degrees(port.E,-150,400)
+    await motor.run_for_degrees(port.F,-100,400)
+    await motor.run_for_degrees(port.F,150,400)
     Turn2Heading(-30)
     moveForDistance(-60)
 
