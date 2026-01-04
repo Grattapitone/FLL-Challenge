@@ -84,7 +84,7 @@ async def main():
     await motor.run_for_degrees(port.E,150,500)
     await motor.run_for_degrees(port.F,180,400)
     Turn2Heading(-40)
-    moveForDistance(-60)
+    moveForDistance(-70)
 
 runloop.run(main())
 
