@@ -2,54 +2,54 @@ from hub import port, motion_sensor
 import motor_pair, motor, sys, time, math
 from collections import namedtuple
 
-class Pid
-    def __init__(self, proportional float, integral float, derivative float)
-        self._pk = proportional
-        self._ik = integral
-        self._dk = derivative
-        self._lt = 0.0
-        self._le = 0.0
-        self._ic = 0.0
+class Pid:
+    def __init__(self, proportional: float, integral: float, derivative: float):
+        self._proportional_constant = proportional
+        self._integral_constant = integral
+        self._derivative_constant = derivative
+        self._last_time = 0.0
+        self._last_error = 0.0
+        self._integral_error_counter = 0.0
 
-    def calculate(self, target int, measurement int) - float
-        dt = 0.0 if self._lt else time.time() - self._lt
-        e = target - measurement
-        p = self._pk  e
-        self._ic += e  dt
-        i = self._ik  self._ic
-        d = 0.0 if dt else self._dk  (e - self._le)  dt
+    def calculate(self, target: int, measurement: int) -> float:
+        delta_time = time.time() - self._last_time if self._last_time else 0.0
+        error = target - measurement
+        #proportional
+        p = self._proportional_constant * error
+        #integral
+        self._integral_error_counter += error * delta_time
+        i = self._integral_constant * self._integral_error_counter
+        #derivative
+        d = self._derivative_constant * (error - self._last_error) / delta_time if delta_time else 0.0
+        #new values to repeat
+        self._last_time = time.time()
+        self._last_error = error
         return p + i + d
 
-class Robot
-    def __init__(self, wheel_diameter float, wheel_distance float, pid Pid, right_motor int, left_motor int, invert_speed bool=True)
+class Robot:
+    def __init__(self, wheel_diameter: float, wheel_distance: float, pid: Pid, right_motor: int, left_motor: int, invert_speed: bool=True):
+
         self._wheel_diameter = wheel_diameter
-        self._wheel_circumference = wheel_diameter  math.pi
-        self._degrees_per_cm = self._wheel_circumference  360
+        self._wheel_circumference = wheel_diameter * math.pi
+        self._degrees_per_cm = self._wheel_circumference / 360
         self._wheel_distance = wheel_distance
         self._right_motor = right_motor
         self._left_motor = left_motor
         self._drive_motors = motor_pair.PAIR_1
         self._invert_speed = invert_speed
         self._pid = pid
-        print(fInitializing Robot instance...)
-        print(fDPC {self._degrees_per_cm})
-        print(fPID {self._pid})
+        print(f"Initializing Robot instance...")
+        print(f"DPC {self._degrees_per_cm}")
+        print(f"PID {self._pid}")
 
-    def move_straight(self, distance float, speed int = 300)
+    def move_straight(self, distance: float, speed: int = 300):
         motor.reset_relative_position(self._right_motor,0)
         motor.reset_relative_position(self._left_motor,0)
-        start_heading = motion_sensor.tilt_angles()[0]
-        degrees = distance  self._degrees_per_cm  self._invert_speed
+        degrees = distance * self._degrees_per_cm * self._invert_speed
         running = True
-        if degrees  0
-            while running
-                motor_pair.move(self._drive_motors, round((motion_sensor.tilt_angles()[0] - start_heading)  10  (100  180)  Kp), velocity = speed)
-                running = (motor.relative_position(self._right_motor) + motor.relative_position(self._left_motor))  2  degrees
-        else
-            while running
-                motor_pair.move(self._drive_motors, round((start_heading - motion_sensor.tilt_angles()[0])  10  (100  180)  Kp), velocity = -speed)
-                running = (motor.relative_position(self._right_motor) + motor.relative_position(self._left_motor))  2  degrees
-
+        while running:
+            motor_pair.move(self._drive_motors, round(self._pid.calculate(degrees, motion_sensor.tilt_angles()[0])), velocity = speed)
+            running = (motor.relative_position(self._right_motor) + motor.relative_position(self._left_motor)) / 2 < abs(degrees)
         motor_pair.stop(self._drive_motors)
         time.sleep_ms(5)
         
