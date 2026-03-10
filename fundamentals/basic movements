@@ -1,123 +1,135 @@
 from hub import port, motion_sensor
-import motor_pair, motor, sys, time, math
+import motor_pair, motor, sys, time, math, color
 from collections import namedtuple
+from app import linegraph
 
 class Pid:
     def __init__(self, proportional: float, integral: float, derivative: float):
-        self._proportional_constant = proportional
-        self._integral_constant = integral
-        self._derivative_constant = derivative
-        self._last_time = 0.0
-        self._last_error = 0.0
-        self._integral_error_counter = 0.0
+        self.__proportional_constant = proportional
+        self.__integral_constant = integral
+        self.__derivative_constant = derivative
+        self.__last_time = 0.0
+        self.__last_error = 0.0
+        self.__integral_error_counter = 0.0
+        self.__i = 0
+        linegraph.clear_all()
 
     def calculate(self, target: int, measurement: int) -> float:
-        delta_time = time.time() - self._last_time if self._last_time else 0.0
-        error = target - measurement
+        linegraph.plot(color.BLACK, self.__i, target)
+        linegraph.plot(color.MAGENTA, self.__i, measurement)
+        delta_time = (time.ticks_ms() - self.__last_time)/1000.0 if self.__last_time else 0.0
+        error = (target - measurement) * delta_time
         #proportional
-        p = self._proportional_constant * error
+        p = self.__proportional_constant * error
         #integral
-        self._integral_error_counter += error * delta_time
-        i = self._integral_constant * self._integral_error_counter
+        self.__integral_error_counter += error
+        i = self.__integral_constant * self.__integral_error_counter
         #derivative
-        d = self._derivative_constant * (error - self._last_error) / delta_time if delta_time else 0.0
+        d = self.__derivative_constant * (error - self.__last_error) if delta_time else 0.0
         #new values to repeat
-        self._last_time = time.time()
-        self._last_error = error
+        self.__last_time = time.ticks_ms()
+        self.__last_error = error
+        linegraph.plot(color.PURPLE, self.__i, p)
+        linegraph.plot(color.AZURE, self.__i, i)
+        linegraph.plot(color.BLUE, self.__i, d)
+        linegraph.plot(color.GREEN, self.__i, p+i+d)
+        self.__i+=1
         return p + i + d
 
 class Robot:
-    def __init__(self, wheel_diameter: float, wheel_distance: float, pid: Pid, right_motor: int, left_motor: int, invert_speed: bool=True):
+    def __init__(self, wheel_diameter: float, wheel_distance: float, pid: Pid, right_motor: int, left_motor: int):
+        self.__wheel_diameter = wheel_diameter
+        self.__wheel_circumference = self.__wheel_diameter * math.pi
+        self.__degrees_per_cm = 360 / self.__wheel_circumference
+        self.__wheel_distance = wheel_distance
+        self.__right_motor = right_motor
+        self.__left_motor = left_motor
+        self.__drive_motors = motor_pair.PAIR_1
+        self.__pid = pid
+        motor_pair.pair(self.__drive_motors, self.__left_motor, self.__right_motor)
+        print("Initializing Robot instance...")
+        print("DPC " + str(self.__degrees_per_cm))
+        print("PID " + str(self.__pid))
 
-        self._wheel_diameter = wheel_diameter
-        self._wheel_circumference = wheel_diameter * math.pi
-        self._degrees_per_cm = self._wheel_circumference / 360
-        self._wheel_distance = wheel_distance
-        self._right_motor = right_motor
-        self._left_motor = left_motor
-        self._drive_motors = motor_pair.PAIR_1
-        self._invert_speed = invert_speed
-        self._pid = pid
-        print(f"Initializing Robot instance...")
-        print(f"DPC {self._degrees_per_cm}")
-        print(f"PID {self._pid}")
-
-    def move_straight(self, distance: float, speed: int = 300):
-        motor.reset_relative_position(self._right_motor,0)
-        motor.reset_relative_position(self._left_motor,0)
-        degrees = distance * self._degrees_per_cm * self._invert_speed
+    def move_straight(self, distance: float, speed: int = 600):
+        motor.reset_relative_position(self.__right_motor,0)
+        motor.reset_relative_position(self.__left_motor,0)
+        target_degrees = abs(distance) * self.__degrees_per_cm
+        speed *= 1 if distance > 0 else -1
+        start_angle = round(motion_sensor.tilt_angles()[0]/10)
         running = True
         while running:
-            motor_pair.move(self._drive_motors, round(self._pid.calculate(degrees, motion_sensor.tilt_angles()[0])), velocity = speed)
-            running = (motor.relative_position(self._right_motor) + motor.relative_position(self._left_motor)) / 2 < abs(degrees)
-        motor_pair.stop(self._drive_motors)
+            pid_o = round(self.__pid.calculate(start_angle, round(motion_sensor.tilt_angles()[0]/10)))
+            motor_pair.move(self.__drive_motors, (-1 if speed > 0 else 1) * pid_o, velocity = speed)
+            running = abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2) < target_degrees
+            print(abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2))
+        motor_pair.stop(self.__drive_motors)
         time.sleep_ms(5)
-        
 
-robot = Robot(8.5, 8.1, Pid(1.0, 1.0, 1.0), port.A, port.B)
 
-robot.move_straight(20.0)
-robot._degrees_per_cm = 0
+robot = Robot(8.5, 8.1, Pid(1.5, 0.1, 0.0), port.B, port.A)
+robot.move_straight(200.0)
+robot.move_straight(-200.0)
 
-# drive_motors = motor_pair.PAIR_1
+# drive_motors = motor_pair.PAIR_1 
 # motor_pair.pair(drive_motors, left_motor, right_motor)
 
 # ########################STRAIGHT######################################################################################################################################
 
-# degrees_per_centimeter = 360  wheel_circumference
+# degrees_per_centimeter = 360wheel_circumference
 
 # Kp = 1.0        # Proportional constant
 
 # def moveForDistance(distance, speed=300)
-#     motor.reset_relative_position(right_motor,0)
-#     heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
-#     degrees = distance  degrees_per_centimeter  direction        # total degrees the motors have to turn
-#     if degrees  0                                # basically if you want the robot to move forward, then
-#         while motor.relative_position(right_motor)  degrees
-#             motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - heading)  10  (100  180)  Kp), velocity = speed)
-#     else
-#         while motor.relative_position(right_motor)  degrees
-#             motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0])  10  (100  180)  Kp), velocity = -speed)
+#    motor.reset_relative_position(right_motor,0)
+#    heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
+#    degrees = distancedegrees_per_centimeterdirection        # total degrees the motors have to turn
+#    if degrees0                                # basically if you want the robot to move forward, then
+#        while motor.relative_position(right_motor)degrees
+#            motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - heading)10(100180)Kp), velocity = speed)
+#    else
+#        while motor.relative_position(right_motor)degrees
+#            motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0])10(100180)Kp), velocity = -speed)
 
-#     motor_pair.stop(0)
-#     time.sleep_ms(5)
+#    motor_pair.stop(0)
+#    time.sleep_ms(5)
 
 # ########################TURN######################################################################################################################################
 
 # def ConvertToRobotDegrees(CompassHeading)    # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
-#     RobotDegrees = CompassHeading  10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
-#     RobotDegrees = RobotDegrees % 3600        # This is what we want if CompassHeading is between 1800 and 3600
-#     if RobotDegrees  1800 and RobotDegrees  3600
-#         RobotDegrees = RobotDegrees - 3600
-#     return RobotDegrees
+#    RobotDegrees = CompassHeading10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
+#    RobotDegrees = RobotDegrees % 3600        # This is what we want if CompassHeading is between 1800 and 3600
+#    if RobotDegrees1800 and RobotDegrees3600
+#        RobotDegrees = RobotDegrees - 3600
+#    return RobotDegrees
 
 # def current_heading_RD()                        # This returns the current position of the Robot in Decidegrees
-#     return -motion_sensor.tilt_angles()[0]        # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
+#    return -motion_sensor.tilt_angles()[0]        # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
 
 # def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading)
-#     SmallestAngle = EndCompassHeading - StartingCompassHeading
-#     if SmallestAngle  180
-#         SmallestAngle -= 360
-#     elif SmallestAngle  -180
-#         SmallestAngle += 360
-#     return SmallestAngle
+#    SmallestAngle = EndCompassHeading - StartingCompassHeading
+#    if SmallestAngle180
+#        SmallestAngle -= 360
+#    elif SmallestAngle-180
+#        SmallestAngle += 360
+#    return SmallestAngle
 
 
 # def Turn2Heading(TargetCompassHeading, speed = 100)
-#     #i=0
-#     if SmallestAngleBetweenTwoHeadings(current_heading_RD()  10 % 360, TargetCompassHeading) = 0
-#         while SmallestAngleBetweenTwoHeadings(current_heading_RD()  10 % 360, TargetCompassHeading) = 0
-#             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))  50
-#             #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
-#             #else
-#             motor_pair.move(drive_motors,100,velocity = speed)
-#     else
-#         while SmallestAngleBetweenTwoHeadings(current_heading_RD()  10 % 360, TargetCompassHeading) = 0
-#             #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))  -50
-#             #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
-#             #else
-#             motor_pair.move(drive_motors,100,velocity = -speed)
-#     motor_pair.stop(0)
+#    #i=0
+#    if SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
+#        while SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
+#            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))50
+#            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+#            #else
+#            motor_pair.move(drive_motors,100,velocity = speed)
+#    else
+#        while SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
+#            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))-50
+#            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+#            #else
+#            motor_pair.move(drive_motors,100,velocity = -speed)
+#    motor_pair.stop(0)
 
 ########################END OF TURN######################################################################################################################################
 
