@@ -2,7 +2,6 @@
 
 |CALENDER WEEK|TODO|
 |---|---|
-
 |11|Schnittstellendefinition
 |12|Roboter zerlegen
 |13|
