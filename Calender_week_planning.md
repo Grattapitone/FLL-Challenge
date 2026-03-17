@@ -1,7 +1,8 @@
 🟢: Ferien
 
 |CALENDER WEEK|TODO|
-|---|---|
+|---|---| 6trf76z8g6xd9yes6gzüye6a93rf6+g79fztx*rye66a/s4+t7h8
+4yx*-e77
 |11|Schnittstellendefinition
 |12|Roboter zerlegen
 |13|
