@@ -3,6 +3,9 @@ import motor_pair, motor, sys, time, math, color
 from collections import namedtuple
 from app import linegraph
 
+def cpysign(var):
+    return 1 if var > 0 else (-1 if var < 0 else 0)
+
 class Pid:
     def __init__(self, proportional: float, integral: float, derivative: float):
         self.__proportional_constant = proportional
@@ -15,8 +18,8 @@ class Pid:
         linegraph.clear_all()
 
     def calculate(self, target: int, measurement: int) -> float:
-        linegraph.plot(color.BLACK, self.__i, target)
-        linegraph.plot(color.MAGENTA, self.__i, measurement)
+        # linegraph.plot(color.BLACK, self.__i, target)
+        # linegraph.plot(color.MAGENTA, self.__i, measurement)
         delta_time = (time.ticks_ms() - self.__last_time)/1000.0 if self.__last_time else 0.0
         error = (target - measurement) * delta_time
         #proportional
@@ -29,15 +32,17 @@ class Pid:
         #new values to repeat
         self.__last_time = time.ticks_ms()
         self.__last_error = error
-        linegraph.plot(color.PURPLE, self.__i, p)
-        linegraph.plot(color.AZURE, self.__i, i)
-        linegraph.plot(color.BLUE, self.__i, d)
-        linegraph.plot(color.GREEN, self.__i, p+i+d)
+        # linegraph.plot(color.ORANGE, self.__i, error)
+        # linegraph.plot(color.PURPLE, self.__i, p)
+        # linegraph.plot(color.AZURE, self.__i, i)
+        # linegraph.plot(color.BLUE, self.__i, d)
+        # linegraph.plot(color.GREEN, self.__i, p+i+d)
         self.__i+=1
         return p + i + d
 
 class Robot:
     def __init__(self, wheel_diameter: float, wheel_distance: float, pid: Pid, right_motor: int, left_motor: int):
+        print("Initializing Robot instance...")
         self.__wheel_diameter = wheel_diameter
         self.__wheel_circumference = self.__wheel_diameter * math.pi
         self.__degrees_per_cm = 360 / self.__wheel_circumference
@@ -47,92 +52,110 @@ class Robot:
         self.__drive_motors = motor_pair.PAIR_1
         self.__pid = pid
         motor_pair.pair(self.__drive_motors, self.__left_motor, self.__right_motor)
-        print("Initializing Robot instance...")
-        print("DPC " + str(self.__degrees_per_cm))
-        print("PID " + str(self.__pid))
+        print ("...done")
 
-    def move_straight(self, distance: float, speed: int = 600):
+    def move_straight(self, distance: float, max_speed: int = 600, acceleration_percent: float = 0.2, deceleration_percent: float = 0.2):
+        linegraph.clear_all()
+        # reset motor angle measurements
         motor.reset_relative_position(self.__right_motor,0)
         motor.reset_relative_position(self.__left_motor,0)
+        # calulate target_speed and target_degrees
         target_degrees = abs(distance) * self.__degrees_per_cm
-        speed *= 1 if distance > 0 else -1
+        max_speed *= cpysign(distance)
+        # store the starting angle, reset speed
         start_angle = round(motion_sensor.tilt_angles()[0]/10)
-        running = True
-        while running:
+        speed = 0.0
+        # start the loop
+        progress = 0.0
+        while progress < 1.0:
+            print(motion_sensor.acceleration(False))
+            linegraph.plot(color.RED, round(progress*100), round(speed))
+            # calculate the progress made since last iteration
+            progress = abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2 / target_degrees)
+            # ac-/decelerate depending on the new progress
+            if progress < acceleration_percent:
+                speed = (progress / acceleration_percent) * (max_speed - 30.0) + 30.0
+            elif progress > (1 - deceleration_percent):
+                speed = (1 - progress) / deceleration_percent * max_speed
+            else:
+                speed = max_speed
+            # calculate the pid value (clas Pid)
             pid_o = round(self.__pid.calculate(start_angle, round(motion_sensor.tilt_angles()[0]/10)))
-            motor_pair.move(self.__drive_motors, (-1 if speed > 0 else 1) * pid_o, velocity = speed)
-            running = abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2) < target_degrees
-            print(abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2))
+            # start moving with the velocity of speed, the direction of the pid depending on the moving direction
+            motor_pair.move(self.__drive_motors, (-1 if speed > 0 else 1) * pid_o, velocity = math.ceil(speed))
+        # stop moving and wait to update the motion sensor
         motor_pair.stop(self.__drive_motors)
         time.sleep_ms(5)
 
 
-robot = Robot(8.5, 8.1, Pid(1.5, 0.1, 0.0), port.B, port.A)
-robot.move_straight(200.0)
-robot.move_straight(-200.0)
+# robot = Robot(8.5, 8.1, Pid(1.5, 0.1, 0.0), port.B, port.A)
+robot = Robot(8.5, 8.1, Pid(1.5, 0.1, 0.01), port.B, port.A)
+robot.move_straight(100.0, acceleration_percent=0.0, deceleration_percent=0.0)
+time.sleep(1)
+robot.move_straight(100.0)
 
-# drive_motors = motor_pair.PAIR_1 
+sys.exit(1)
+
+# drive_motors = motor_pair.PAIR_1
 # motor_pair.pair(drive_motors, left_motor, right_motor)
 
 # ########################STRAIGHT######################################################################################################################################
 
-# degrees_per_centimeter = 360wheel_circumference
+# degrees_per_centimeter = 360 / wheel_circumference
 
 # Kp = 1.0        # Proportional constant
 
 # def moveForDistance(distance, speed=300)
-#    motor.reset_relative_position(right_motor,0)
-#    heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
-#    degrees = distancedegrees_per_centimeterdirection        # total degrees the motors have to turn
-#    if degrees0                                # basically if you want the robot to move forward, then
-#        while motor.relative_position(right_motor)degrees
-#            motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - heading)10(100180)Kp), velocity = speed)
-#    else
-#        while motor.relative_position(right_motor)degrees
-#            motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0])10(100180)Kp), velocity = -speed)
+# motor.reset_relative_position(right_motor,0)
+# heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
+# degrees = distancedegrees_per_centimeterdirection        # total degrees the motors have to turn
+# if degrees0                                # basically if you want the robot to move forward, then
+#     while motor.relative_position(right_motor)degrees
+#         motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - heading)10(100180)Kp), velocity = speed)
+# else
+#     while motor.relative_position(right_motor)degrees
+#         motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0])10(100180)Kp), velocity = -speed)
 
-#    motor_pair.stop(0)
-#    time.sleep_ms(5)
+# motor_pair.stop(0)
+# time.sleep_ms(5)
 
 # ########################TURN######################################################################################################################################
 
 # def ConvertToRobotDegrees(CompassHeading)    # This converts a number in the range of 0 to 360 excluding 360 to a number in the Range of -1800 to 1800
-#    RobotDegrees = CompassHeading10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
-#    RobotDegrees = RobotDegrees % 3600        # This is what we want if CompassHeading is between 1800 and 3600
-#    if RobotDegrees1800 and RobotDegrees3600
-#        RobotDegrees = RobotDegrees - 3600
-#    return RobotDegrees
+# RobotDegrees = CompassHeading10        # We are multiplying by 10 because otherwise we have inaccuracies because of floatingpoints
+# RobotDegrees = RobotDegrees % 3600        # This is what we want if CompassHeading is between 1800 and 3600
+# if RobotDegrees1800 and RobotDegrees3600
+#     RobotDegrees = RobotDegrees - 3600
+# return RobotDegrees
 
 # def current_heading_RD()                        # This returns the current position of the Robot in Decidegrees
-#    return -motion_sensor.tilt_angles()[0]        # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
+# return -motion_sensor.tilt_angles()[0]        # motion_sensor.tilt_angles()[0] is negated because otherwise it gives us negative values
 
 # def SmallestAngleBetweenTwoHeadings(StartingCompassHeading, EndCompassHeading)
-#    SmallestAngle = EndCompassHeading - StartingCompassHeading
-#    if SmallestAngle180
-#        SmallestAngle -= 360
-#    elif SmallestAngle-180
-#        SmallestAngle += 360
-#    return SmallestAngle
+# SmallestAngle = EndCompassHeading - StartingCompassHeading
+# if SmallestAngle180
+#     SmallestAngle -= 360
+# elif SmallestAngle-180
+#     SmallestAngle += 360
+# return SmallestAngle
 
 
 # def Turn2Heading(TargetCompassHeading, speed = 100)
-#    #i=0
-#    if SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
-#        while SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
-#            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))50
-#            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
-#            #else
-#            motor_pair.move(drive_motors,100,velocity = speed)
-#    else
-#        while SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
-#            #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))-50
-#            #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
-#            #else
-#            motor_pair.move(drive_motors,100,velocity = -speed)
-#    motor_pair.stop(0)
+# #i=0
+# if SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
+#     while SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
+#         #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))50
+#         #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+#         #else
+#         motor_pair.move(drive_motors,100,velocity = speed)
+# else
+#     while SmallestAngleBetweenTwoHeadings(current_heading_RD()10 % 360, TargetCompassHeading) = 0
+#         #if current_heading_RD() + round(ConvertToRobotDegrees(TargetCompassHeading))-50
+#         #    motor_pair.move(drive_motors,100,velocity = SmallestAngleBetweenTwoHeadings(current_heading_RD(),TargetCompassHeading))
+#         #else
+#         motor_pair.move(drive_motors,100,velocity = -speed)
+# motor_pair.stop(0)
 
-########################END OF TURN######################################################################################################################################
+# #######################END OF TURN######################################################################################################################################
 
 # Turn2Heading(180);
-
-sys.exit(0)
