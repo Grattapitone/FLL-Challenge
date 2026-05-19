@@ -13,7 +13,6 @@ class Pid:
         self.__proportional_constant = proportional
         self.__integral_constant = integral
         self.__derivative_constant = derivative
-        self.__last_time = 0.0
         self.__last_error = 0.0
         self.__integral_error_counter = 0.0
         self.__i = 0
@@ -22,15 +21,14 @@ class Pid:
     def calculate(self, target: float, measurement: float) -> float:
         # linegraph.plot(color.BLACK, self.__i, target)
         # linegraph.plot(color.MAGENTA, self.__i, measurement)
-        delta_time = (time.ticks_ms() - self.__last_time)/1000.0 if self.__last_time else 0.0
-        error = (target - measurement) * delta_time
+        error = target - measurement
         #proportional
         p = self.__proportional_constant * error
         #integral
         self.__integral_error_counter += error
         i = self.__integral_constant * self.__integral_error_counter
         #derivative
-        d = self.__derivative_constant * (error - self.__last_error) if delta_time else 0.0
+        d = self.__derivative_constant * (error - self.__last_error)
         #new values to repeat
         self.__last_time = time.ticks_ms()
         self.__last_error = error
@@ -45,6 +43,7 @@ class Pid:
 class Robot:
     def __init__(self, wheel_diameter: float, wheel_distance: float, pid: Pid, acceleration_distance: float, deceleration_distance: float,right_motor: int, left_motor: int):
         print("Initializing Robot instance...")
+        self.__DIR_TO_STEERING = 100 / 180
         self.__wheel_diameter = wheel_diameter
         self.__wheel_circumference = self.__wheel_diameter * math.pi
         self.__degrees_per_cm = 360 / self.__wheel_circumference
@@ -58,8 +57,32 @@ class Robot:
         motor_pair.pair(self.__drive_motors, self.__left_motor, self.__right_motor)
         print ("...done")
 
-    def move_straight(self, distance: int, max_speed: int = 600):
-        linegraph.clear_all()
+    def turn(self, to_angle: int, max_speed: int = 200):
+        to_angle %= 360
+        stop = False
+        speed = max_speed
+        # start_angle = motion_sensor.tilt_angles()[0]/10%360
+        
+        while not stop:
+            turn_dir = cpysign(to_angle - motion_sensor.tilt_angles()[0]/10)
+            # if abs(to_angle - motion_sensor.tilt_angles()[0]/10%360) > 180:
+                # turn_dir *= -1
+            print(turn_dir)
+            # progress_angle 
+            # if  < self.__acceleration_dg:
+            #     speed = (turn_by / self.__acceleration_dg) * (max_speed - 30.0) + 30.0
+            # elif turn_by > (turn_by - self.__deceleration_dg) and turn_by <= target_dg:
+            #     speed = (turn_by - progress_dg) / self.__deceleration_dg * (max_speed - 30.0) + 30.0
+            # else:
+            #     speed = max_speed
+            motor_pair.move(self.__drive_motors, 100, velocity = round(turn_dir * speed))
+            stop = motion_sensor.tilt_angles()[0]/10 > to_angle if turn_dir else motion_sensor.tilt_angles()[0]/10 < to_angle
+            print(stop)
+        motor_pair.stop(0)
+        time.sleep_ms(5)
+
+    def move(self, distance: int, max_speed: int = 600):
+        # linegraph.clear_all()
         # reset motor angle measurements
         motor.reset_relative_position(self.__right_motor,0)
         motor.reset_relative_position(self.__left_motor,0)
@@ -72,7 +95,7 @@ class Robot:
         # start the loop
         progress_dg = 0.0
         while progress_dg < target_dg:
-            linegraph.plot(color.RED, progress_dg, round(speed * cpysign(distance)))
+            # linegraph.plot(color.RED, progress_dg, round(speed * cpysign(distance)))
             # calculate the progress made since last iteration
             progress_dg = abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2)
             # ac-/decelerate depending on the new progress
@@ -85,17 +108,18 @@ class Robot:
             # calculate the pid value (class Pid)
             pid_o = round(self.__pid.calculate(start_angle, motion_sensor.tilt_angles()[0]/10))
             # start moving with the velocity of speed, the direction of the pid depending on the moving direction
-            motor_pair.move(self.__drive_motors, pid_o * -cpysign(distance), velocity = round(speed * cpysign(distance)))
+            motor_pair.move(self.__drive_motors, round(pid_o * -cpysign(distance) * self.__DIR_TO_STEERING), velocity = round(speed * cpysign(distance)))
         # stop moving and wait to update the motion sensor
         motor_pair.stop(self.__drive_motors)
         time.sleep_ms(5)
 
 
-robot = Robot(8.5, 8.1, Pid(1, 0, 0), 10, 10, port.B, port.A)
-robot.move_straight(200)
-robot.move_straight(-200)
+robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A)
+# robot.move(100)
+robot.turn(45)
+# robot.move(100)
 
-sys.exit(1)
+sys.exit(0)
 
 # drive_motors = motor_pair.PAIR_1
 # motor_pair.pair(drive_motors, left_motor, right_motor)
