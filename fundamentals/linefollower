@@ -1,14 +1,14 @@
 from hub import port
 import motor_pair, motor, sys, time, color_sensor
 
-########################   CONFIGURATION   #############################################################################################################################################
+########################CONFIGURATION#############################################################################################################################################
 
 wheel_circumference = 27.5
 right_motor = port.A
 left_motor = port.B
 blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False
 
-########################   END OF CONFIGURATION   ######################################################################################################################################
+########################END OF CONFIGURATION######################################################################################################################################
 
 if blue_outboard == True:
     direction = -1
@@ -22,23 +22,29 @@ degrees_per_centimeter = 360 / wheel_circumference
 
 Kp = 1.0        # Proportional constant
 
-def followLine(distance, side="left", speed=300):
+def followLine(distance, sensorside="left", inorout="in", speed=300):       # NO NEGATIVE DISTANCE, IT CAN'T WORK
     motor.reset_relative_position(right_motor,0)
-    if side == "left":      # which sensor should be used?
-        sensor = port.C     # left sensor
-    else:
-        sensor = port.D     # right sensor
     degrees = distance * degrees_per_centimeter * direction        # total degrees the motors have to turn
-    if degrees > 0:                                # basically "if you want the robot to move forward, then"
-        while motor.relative_position(right_motor) < degrees:
-            motor_pair.move(drive_motors, round((color_sensor.reflection(sensor) - 50) * Kp), velocity = speed)
+    if sensorside == "left":    # which sensor should be used?
+        sensor = port.C    # left sensor
+        if inorout == "in":                                # basically "if you want the robot to move forward, then"
+            while motor.relative_position(right_motor) > degrees:
+                motor_pair.move(drive_motors, round(-(color_sensor.reflection(sensor) - 50) * Kp), velocity = -speed)
+        else:
+            while motor.relative_position(right_motor) > degrees:
+                motor_pair.move(drive_motors, round((color_sensor.reflection(sensor) - 50) * Kp), velocity = -speed)
     else:
-        while motor.relative_position(right_motor) > degrees:
-            motor_pair.move(drive_motors, round(-(color_sensor.reflection(sensor) - 50) * Kp), velocity = -speed)
+        sensor = port.D    # right sensor
+        if inorout == "in":                                # basically "if you want the robot to move forward, then"
+            while motor.relative_position(right_motor) > degrees:
+                motor_pair.move(drive_motors, round((color_sensor.reflection(sensor) - 50) * Kp), velocity = -speed)
+        else:
+            while motor.relative_position(right_motor) > degrees:
+                motor_pair.move(drive_motors, round(-(color_sensor.reflection(sensor) - 50) * Kp), velocity = -speed)
 
     motor_pair.stop(0)
     time.sleep_ms(5)
 
-followLine(500) 
+followLine(500, sensorside = "right", inorout = "in")
 
 sys.exit()
