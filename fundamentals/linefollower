@@ -1,0 +1,40 @@
+from hub import port, motion_sensor
+import motor_pair, motor, sys, time
+
+########################   CONFIGURATION   #############################################################################################################################################
+
+wheel_circumference = 27.5
+right_motor = port.A
+left_motor = port.B
+blue_outboard = True        #if the blue disk is outboard, write True; if the blue disk is inboard, write False
+
+########################   END OF CONFIGURATION   ######################################################################################################################################
+
+if blue_outboard == True:
+    direction = -1
+else:
+    direction = 1
+
+drive_motors = motor_pair.PAIR_1
+motor_pair.pair(drive_motors, left_motor, right_motor)
+
+degrees_per_centimeter = 360 / wheel_circumference
+
+Kp = 1.0        # Proportional constant
+
+def moveForDistance(distance, speed=300):
+    motor.reset_relative_position(right_motor,0)
+    heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
+    degrees = distance * degrees_per_centimeter * direction        # total degrees the motors have to turn
+    if degrees > 0:                                # basically "if you want the robot to move forward, then"
+        while motor.relative_position(right_motor) < degrees:
+            motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - heading) / 10 * (100 / 180) * Kp), velocity = speed)
+    else:
+        while motor.relative_position(right_motor) > degrees:
+            motor_pair.move(drive_motors, round((heading - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
+
+    motor_pair.stop(0)
+    time.sleep_ms(5)
+
+
+sys.exit()
