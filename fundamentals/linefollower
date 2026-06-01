@@ -39,6 +39,6 @@ def followLine(distance, side="left", speed=300):
     motor_pair.stop(0)
     time.sleep_ms(5)
 
-followLine(500)
+followLine(500) 
 
 sys.exit()
