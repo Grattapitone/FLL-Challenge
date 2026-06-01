@@ -26,18 +26,19 @@ def followLine(distance, side="left", speed=300):
     motor.reset_relative_position(right_motor,0)
     if side == "left":      # which sensor should be used?
         sensor = port.C     # left sensor
-    if side == "right":
+    else:
         sensor = port.D     # right sensor
     degrees = distance * degrees_per_centimeter * direction        # total degrees the motors have to turn
     if degrees > 0:                                # basically "if you want the robot to move forward, then"
         while motor.relative_position(right_motor) < degrees:
-            motor_pair.move(drive_motors, round((motion_sensor.tilt_angles()[0] - reflection) / 10 * (100 / 180) * Kp), velocity = speed)
+            motor_pair.move(drive_motors, round((color_sensor.reflection(sensor) - 50) * Kp), velocity = speed)
     else:
         while motor.relative_position(right_motor) > degrees:
-            motor_pair.move(drive_motors, round((reflection - motion_sensor.tilt_angles()[0]) / 10 * (100 / 180) * Kp), velocity = -speed)
+            motor_pair.move(drive_motors, round(-color_sensor.reflection(sensor) * Kp), velocity = -speed)
 
     motor_pair.stop(0)
     time.sleep_ms(5)
 
+followLine(500)
 
 sys.exit()
