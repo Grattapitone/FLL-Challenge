@@ -58,26 +58,21 @@ class Robot:
         print ("...done")
 
     def turn(self, to_angle: int, max_speed: int = 200):
-        to_angle %= 360
         stop = False
         speed = max_speed
-        # start_angle = motion_sensor.tilt_angles()[0]/10%360
-        
+        linegraph.clear_all()
+        i = 0
         while not stop:
-            turn_dir = cpysign(to_angle - motion_sensor.tilt_angles()[0]/10)
-            # if abs(to_angle - motion_sensor.tilt_angles()[0]/10%360) > 180:
-                # turn_dir *= -1
-            print(turn_dir)
-            # progress_angle 
-            # if  < self.__acceleration_dg:
-            #     speed = (turn_by / self.__acceleration_dg) * (max_speed - 30.0) + 30.0
-            # elif turn_by > (turn_by - self.__deceleration_dg) and turn_by <= target_dg:
-            #     speed = (turn_by - progress_dg) / self.__deceleration_dg * (max_speed - 30.0) + 30.0
-            # else:
-            #     speed = max_speed
-            motor_pair.move(self.__drive_motors, 100, velocity = round(turn_dir * speed))
-            stop = motion_sensor.tilt_angles()[0]/10 > to_angle if turn_dir else motion_sensor.tilt_angles()[0]/10 < to_angle
-            print(stop)
+            i += 1
+            turn_dir = to_angle + motion_sensor.tilt_angles()[0]/10
+            linegraph.plot(0, i, turn_dir)
+            linegraph.plot(1, i, motion_sensor.tilt_angles()[0]/10)
+            while abs(turn_dir) > 180:
+                turn_dir += -360 if cpysign(turn_dir) else 360
+            linegraph.plot(2, i, turn_dir)
+            motor_pair.move(self.__drive_motors, 100, velocity = round(cpysign(turn_dir) * speed))
+            stop = abs(turn_dir) <= 5
+            linegraph.plot(3, i, stop * 20)
         motor_pair.stop(0)
         time.sleep_ms(5)
 
@@ -116,7 +111,7 @@ class Robot:
 
 robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A)
 # robot.move(100)
-robot.turn(45)
+robot.turn(-90, 50)
 # robot.move(100)
 
 sys.exit(0)
