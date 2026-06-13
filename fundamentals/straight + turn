@@ -25,7 +25,7 @@ degrees_per_centimeter = 360 / wheel_circumference
 Kp = 1.0        # Proportional constant
 
 def moveForDistance(distance, speed=300):
-    motor.reset_relative_position(right_motor,0)
+    motor.reset_relative_position(right_motor, 0)
     heading = motion_sensor.tilt_angles()[0]            # Heading at the Beginning
     degrees = distance * degrees_per_centimeter * direction        # total degrees the motors have to turn
     if degrees > 0:                                # basically "if you want the robot to move forward, then"
