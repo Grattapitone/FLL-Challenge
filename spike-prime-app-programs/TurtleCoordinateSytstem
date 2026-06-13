@@ -1,3 +1,4 @@
+import turtle
 import math
 
 def move_to_target(target_x, target_y):
