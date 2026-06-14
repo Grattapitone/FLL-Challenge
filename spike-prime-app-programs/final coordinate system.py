@@ -22,7 +22,8 @@ Kp = 1.5
 def moveForDistance(distance, speed=300):
     degrees = distance * degrees_per_centimeter         # total degrees the motors have to turn
 
-    motor_beg_pos = motor.absolute_position(port.A)     # beginning position of the Motor
+    motor.reset_relative_position(port.A, 0)
+    motor_beg_pos = motor.relative_position(port.A)     # beginning position of the Motor
     while motor.relative_position(port.A) - motor_beg_pos < degrees:
         motor_pair.move(motor_pair.PAIR_1, round(motion_sensor.tilt_angles()[0]/10 * (100/ 180) * Kp), velocity = speed)
     motor_pair.stop(motor_pair.PAIR_1)

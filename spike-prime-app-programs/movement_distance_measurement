@@ -32,10 +32,10 @@ if blue_outboard == True:
 else:
     direction = 1
 
-#drive_motors = motor_pair.PAIR_1
-#motor_pair.pair(drive_motors, right_motor, left_motor)
+drive_motors = motor_pair.PAIR_1
+motor_pair.pair(drive_motors, right_motor, left_motor)
 degrees_per_centimeter = 360 / wheel_circumference
-last_time = 0
+last_time = time.time_ns()
 
 Kp = 1        # Proportional constant
 
@@ -51,6 +51,7 @@ def calculate_data(current_acc_right, current_acc_forward):
     print(cur_time)
     time_diff = cur_time - last_time
     last_time = cur_time
+    current_speed_right = time_diff * current_acc_right * 1000
     current_speed_forward = time_diff * current_acc_forward * 1000
     return current_acc_right, current_acc_forward, current_speed_right, current_speed_forward, time_diff
 

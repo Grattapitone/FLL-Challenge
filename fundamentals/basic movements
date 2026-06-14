@@ -68,7 +68,7 @@ class Robot:
             linegraph.plot(0, i, turn_dir)
             linegraph.plot(1, i, motion_sensor.tilt_angles()[0]/10)
             while abs(turn_dir) > 180:
-                turn_dir += -360 if cpysign(turn_dir) else 360
+                turn_dir += -360 if turn_dir > 0 else 360
             linegraph.plot(2, i, turn_dir)
             motor_pair.move(self.__drive_motors, 100, velocity = round(cpysign(turn_dir) * speed))
             stop = abs(turn_dir) <= 5
