@@ -1,7 +1,7 @@
 from hub import port, motion_sensor
 import motor_pair, motor, sys, time, math, color
 from collections import namedtuple
-# from app import linegraph
+from app import linegraph
 
 def cpysign(var):
     return 1 if var > 0 else (-1 if var < 0 else 0)
@@ -69,35 +69,34 @@ class Robot:
             while abs(dif) > 180:
                 dif += -360 if dif > 0 else 360
             return dif
-        speed = max_speed * cpysign(smallest_angle())
-        # stop = False
-        # while not stop:
-        #     angle_dif = smallest_angle()
-        #     stop = angle_dif < 0 if cpysign(speed) > 0 else angle_dif > 0
 
-        #     progress_dg = angle_dif
-        #     # ac-/decelerate depending on the new progress
-        #     if progress_dg < self.__acceleration_dg:
-        #         speed = (progress_dg / self.__acceleration_dg) * (max_speed - 30.0) + 30.0
-        #     elif progress_dg > (target_dg - self.__deceleration_dg) and progress_dg <= target_dg:
-        #         speed = (target_dg - progress_dg) / self.__deceleration_dg * (max_speed - 30.0) + 30.0
-        #     else:
-        #         speed = max_speed
+
         # linegraph.clear_all()
+        speed = max_speed * cpysign(smallest_angle())
+        start_angle_dif = smallest_angle()
+        stop = False
         # i = 0
-        steps = 0
-        while steps < 4:
+        while not stop:
+            angle_dif = smallest_angle()
+            stop = angle_dif < 0 if cpysign(speed) > 0 else angle_dif > 0
+            # progress_dg = abs(start_angle_dif - angle_dif)
+            # # ac-/decelerate depending on the new progress
+            # if progress_dg < self.__acceleration_dg:
+            #     speed = (progress_dg / self.__acceleration_dg) * (max_speed - 30.0) + 30.0
+            # elif progress_dg > (start_angle_dif - self.__deceleration_dg) and progress_dg <= start_angle_dif:
+            #     speed = (start_angle_dif - progress_dg) / self.__deceleration_dg * (max_speed - 30.0) + 30.0
+            # else:
+            #     speed = max_speed
+            # speed *= cpysign(angle_dif)
+            # linegraph.plot(0, i, speed)
             motor_pair.move(self.__drive_motors, 100, velocity = round(speed))
             if smallest_angle() < 0 if cpysign(speed) > 0 else smallest_angle() > 0:
-                steps += 1
-                speed *= -0.5
-                if abs(speed) < 30:
-                    speed = cpysign(speed) * 30
+                stop = True
+            i += 1
         motor_pair.stop(0)
         time.sleep_ms(self.__MOVE_DELAY)
 
     def move(self, distance: int, max_speed: int = 600):
-        # linegraph.clear_all()
         # reset motor angle measurements
         motor.reset_relative_position(self.__right_motor,0)
         motor.reset_relative_position(self.__left_motor,0)
@@ -129,11 +128,16 @@ class Robot:
         time.sleep_ms(self.__MOVE_DELAY)
 
 robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A, 50)
-robot.move(100)
-robot.turn(180)
-robot.move(100)
+# robot.move(100)
+# robot.turn(180)
+# robot.move(100)
+# robot.turn(90)
+# robot.turn(0)
 robot.turn(90)
+time.sleep(1)
 robot.turn(0)
+time.sleep(1)
+robot.turn(-90)
 # robot.turn(-80)
 # robot.move(100)
 
