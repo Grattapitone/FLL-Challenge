@@ -41,11 +41,11 @@ class Pid:
         return p + i + d
 
 class Robot:
-    def __init__(self, wheel_diameter: float, 
-                wheel_distance: float, 
-                pid: Pid, acceleration_distance: float, 
+    def __init__(self, wheel_diameter: float,
+                wheel_distance: float,
+                pid: Pid, acceleration_distance: float,
                 deceleration_distance: float,
-                right_motor: int, left_motor: int, 
+                right_motor: int, left_motor: int,
                 move_delay: int):
         print("Initializing Robot instance...")
         self.__DIR_TO_STEERING = 100 / 180
@@ -60,6 +60,8 @@ class Robot:
         self.__pid = pid
         self.__acceleration_dg = acceleration_distance * self.__degrees_per_cm
         self.__deceleration_dg = deceleration_distance * self.__degrees_per_cm
+        self.__start_time = time.ticks_ms()
+        linegraph.clear_all()
         motor_pair.pair(self.__drive_motors, self.__left_motor, self.__right_motor)
         print ("...done")
 
@@ -70,29 +72,25 @@ class Robot:
                 dif += -360 if dif > 0 else 360
             return dif
 
-
-        # linegraph.clear_all()
-        speed = max_speed * cpysign(smallest_angle())
         start_angle_dif = smallest_angle()
         stop = False
-        # i = 0
         while not stop:
             angle_dif = smallest_angle()
-            stop = angle_dif < 0 if cpysign(speed) > 0 else angle_dif > 0
-            # progress_dg = abs(start_angle_dif - angle_dif)
-            # # ac-/decelerate depending on the new progress
-            # if progress_dg < self.__acceleration_dg:
-            #     speed = (progress_dg / self.__acceleration_dg) * (max_speed - 30.0) + 30.0
-            # elif progress_dg > (start_angle_dif - self.__deceleration_dg) and progress_dg <= start_angle_dif:
-            #     speed = (start_angle_dif - progress_dg) / self.__deceleration_dg * (max_speed - 30.0) + 30.0
-            # else:
-            #     speed = max_speed
-            # speed *= cpysign(angle_dif)
-            # linegraph.plot(0, i, speed)
+            progress_dg = abs(start_angle_dif - angle_dif)
+            # ac-/decelerate depending on the new progress
+            if progress_dg < self.__acceleration_dg:
+               speed = (progress_dg / self.__acceleration_dg) * (max_speed - 30.0) + 30.0
+            elif progress_dg > (start_angle_dif - self.__deceleration_dg) and progress_dg <= start_angle_dif:
+               speed = (start_angle_dif - progress_dg) / self.__deceleration_dg * (max_speed - 30.0) + 30.0
+            else:
+               speed = max_speed
+            speed *= cpysign(start_angle_dif)
+            self.lg_plot(0, speed)
+            self.lg_plot(1, -motion_sensor.tilt_angles()[0] / 10)
             motor_pair.move(self.__drive_motors, 100, velocity = round(speed))
-            if smallest_angle() < 0 if cpysign(speed) > 0 else smallest_angle() > 0:
-                stop = True
-            i += 1
+            stop = angle_dif < 0 if cpysign(speed) > 0 else angle_dif > 0
+        self.lg_plot(0, -2000)
+        self.lg_plot(1, -2000)
         motor_pair.stop(0)
         time.sleep_ms(self.__MOVE_DELAY)
 
@@ -127,19 +125,15 @@ class Robot:
         motor_pair.stop(self.__drive_motors)
         time.sleep_ms(self.__MOVE_DELAY)
 
+    def lg_plot(self, id: int, y: float):
+        linegraph.plot(id, time.ticks_ms() - self.__start_time, y)
+
 robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A, 50)
-# robot.move(100)
-# robot.turn(180)
-# robot.move(100)
-# robot.turn(90)
-# robot.turn(0)
 robot.turn(90)
 time.sleep(1)
 robot.turn(0)
 time.sleep(1)
 robot.turn(-90)
-# robot.turn(-80)
-# robot.move(100)
 
 sys.exit(0)
 
