@@ -1,6 +1,5 @@
 from hub import port, motion_sensor
 import motor_pair, motor, sys, time, math, color
-from collections import namedtuple
 from app import linegraph
 
 linegraph.clear_all()
@@ -63,19 +62,22 @@ class Robot:
         self.__acceleration_dg = acceleration_distance * self.__degrees_per_cm
         self.__deceleration_dg = deceleration_distance * self.__degrees_per_cm
         self.__log_start = time.ticks_us()
+        self.__target_angle = 0
         motor_pair.pair(self.__drive_motors, self.__left_motor, self.__right_motor)
         print ("...done")
 
     def log(self, color: int, value: float):
-        linegraph.plot(color, round((time.ticks_us() - self.__log_start)/1000), value)
+        #linegraph.plot(color, round((time.ticks_us() - self.__log_start)/1000), value)
+        pass
 
-    def turn(self, to_angle: int, max_speed: int = 200):
+    def turn(self, to_angle: int, max_speed: int = 100):
         def smallest_angle():
             dif = to_angle + motion_sensor.tilt_angles()[0] / 10
             while abs(dif) > 180:
                 dif += -360 if dif > 0 else 360
             return dif
 
+        self.__target_angle = to_angle
         speed = max_speed * cpysign(smallest_angle())
         start_angle_dif = smallest_angle()
         stop = False
@@ -99,7 +101,7 @@ class Robot:
         motor_pair.stop(self.__drive_motors)
         time.sleep_ms(self.__MOVE_DELAY)
 
-    def move(self, distance: int, max_speed: int = 600):
+    def move(self, distance: int, max_speed: int = 650):
         # reset motor angle measurements
         motor.reset_relative_position(self.__right_motor,0)
         motor.reset_relative_position(self.__left_motor,0)
@@ -107,12 +109,12 @@ class Robot:
         target_dg = abs(distance) * self.__degrees_per_cm
         max_speed = abs(max_speed)
         # store the starting angle, reset speed
-        start_angle = round(motion_sensor.tilt_angles()[0]/10)
+        start_angle = motion_sensor.tilt_angles()[0]/10 #self.__target_angle 
+        # start_angle = round(motion_sensor.tilt_angles()[0]/10)
         speed = 0.0
         # start the loop
         progress_dg = 0.0
         while progress_dg < target_dg:
-            # linegraph.plot(color.RED, progress_dg, round(speed * cpysign(distance)))
             # calculate the progress made since last iteration
             progress_dg = abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2)
             # ac-/decelerate depending on the new progress
@@ -129,15 +131,39 @@ class Robot:
         # stop moving and wait to update the motion sensor
         motor_pair.stop(self.__drive_motors)
         time.sleep_ms(self.__MOVE_DELAY)
-
+        
 robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A, 50)
 
-for i in range(1, 5):
-    robot.turn(i*90)
-    robot.move(30)
-    time.sleep_ms(200)
-for i in range(1, 5):
-    robot.turn(i*-90) 
-    robot.move(30)   
-    time.sleep_ms(200)
+#### TEST NAVIGATION ####
+# for i in range(1, 5):
+#     robot.turn(i*90, 600)
+#     robot.move(30)
+#     time.sleep_ms(200)
+# for i in range(1, 5):
+#     robot.turn(i*-90) 
+#     robot.move(30)   
+#     time.sleep_ms(200)
+
+#start
+robot.move(69)
+#1
+robot.turn(-90)
+robot.move(66)
+#2
+robot.turn(20)
+robot.move(38)
+#3
+robot.turn(52)
+robot.move(52)
+#4
+robot.turn(47)
+robot.move(73)
+#5
+robot.turn(-58)
+robot.move(107)
+#6
+robot.turn(170)
+robot.move(230, 1050)
+#start
+
 sys.exit(0)
