@@ -67,8 +67,8 @@ class Robot:
         print ("...done")
 
     def log(self, color: int, value: float):
-        #linegraph.plot(color, round((time.ticks_us() - self.__log_start)/1000), value)
-        pass
+        linegraph.plot(color, round((time.ticks_us() - self.__log_start)/1000), value)
+        # pass
 
     def turn(self, to_angle: int, max_speed: int = 100):
         def smallest_angle():
@@ -114,7 +114,19 @@ class Robot:
         speed = 0.0
         # start the loop
         progress_dg = 0.0
+
+        DIS = 0
+        VEL = 0
+        LAST_T = time.ticks_ms()
+
         while progress_dg < target_dg:
+            DT = LAST_T - time.ticks_ms()
+            LAST_T = time.ticks_ms()
+            VEL += motion_sensor.acceleration(True)[0] * DT / 1000 / 9.81
+            DIS += VEL * DT / 1000
+            self.log(4, motion_sensor.acceleration(True)[0])
+            self.log(6, VEL)
+            self.log(7, DIS)
             # calculate the progress made since last iteration
             progress_dg = abs((motor.relative_position(self.__right_motor) - motor.relative_position(self.__left_motor)) / 2)
             # ac-/decelerate depending on the new progress
@@ -131,8 +143,11 @@ class Robot:
         # stop moving and wait to update the motion sensor
         motor_pair.stop(self.__drive_motors)
         time.sleep_ms(self.__MOVE_DELAY)
-        
+
 robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A, 50)
+
+#### TEST DISTANCE ACCELERATION MEASUREMENT
+robot.move(500)
 
 #### TEST NAVIGATION ####
 # for i in range(1, 5):
@@ -144,26 +159,26 @@ robot = Robot(8.5, 8.1, Pid(1.3, 0, 0), 10, 10, port.B, port.A, 50)
 #     robot.move(30)   
 #     time.sleep_ms(200)
 
-#start
-robot.move(69)
-#1
-robot.turn(-90)
-robot.move(66)
-#2
-robot.turn(20)
-robot.move(38)
-#3
-robot.turn(52)
-robot.move(52)
-#4
-robot.turn(47)
-robot.move(73)
-#5
-robot.turn(-58)
-robot.move(107)
-#6
-robot.turn(170)
-robot.move(230, 1050)
-#start
+# #start
+# robot.move(69)
+# #1
+# robot.turn(-90)
+# robot.move(66)
+# #2
+# robot.turn(20)
+# robot.move(38)
+# #3
+# robot.turn(52)
+# robot.move(52)
+# #4
+# robot.turn(47)
+# robot.move(73)
+# #5
+# robot.turn(-58)
+# robot.move(107)
+# #6
+# robot.turn(170)
+# robot.move(230, 1050)
+# #start
 
 sys.exit(0)
